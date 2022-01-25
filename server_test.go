@@ -9,6 +9,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
@@ -22,14 +23,20 @@ func TestMain(m *testing.M) {
 }
 
 func TestRegisterCall(t *testing.T) {
-	tests := []Call{
-		{Timestamp: time.Now(), Payload: postgres.Jsonb{RawMessage: json.RawMessage(`{"blaat": 0}`)}, Organisation: "testorg", Repository: "testrepo"},
+	type test struct {
+		input     Call
+		expectErr bool
+	}
+
+	tests := []test{
+		{input: Call{Timestamp: time.Now(), Payload: postgres.Jsonb{RawMessage: json.RawMessage(`{"blaat": 0}`)}, Organisation: "testorg", Repository: "testrepo"}, expectErr: false},
+		{input: Call{Timestamp: time.Now(), Payload: postgres.Jsonb{RawMessage: json.RawMessage(`invalid`)}, Organisation: "testorg", Repository: "testrepo"}, expectErr: true},
 	}
 
 	for _, test := range tests {
-		err := registerCall(test)
+		err := registerCall(test.input)
 		spew.Dump(err)
-
+		assert.Equal(t, err != nil, test.expectErr)
 	}
 
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -30,6 +31,9 @@ func autoMigrate() error {
 }
 
 func registerCall(c Call) error {
+	if !json.Valid(c.Payload.RawMessage) {
+		return fmt.Errorf("%s is invalid JSON", c.Payload.RawMessage)
+	}
 	result := db.Create(&c)
 	return result.Error
 }

@@ -9,6 +9,7 @@ import (
 	pgd "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
+	"gorm.io/datatypes"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -18,7 +19,15 @@ var db *gorm.DB
 type Call struct {
 	ID           uint `gorm:"primaryKey"`
 	Timestamp    time.Time
-	Payload      pgd.Jsonb
+	Payload      pgd.Jsonb `gorm:"type:jsonb"`
+	Organisation string
+	Repository   string
+}
+
+type FilterQuery struct {
+	Key          string
+	FromDate     string
+	ToDate       string
 	Organisation string
 	Repository   string
 }
@@ -28,6 +37,12 @@ func autoMigrate() error {
 		return err
 	}
 	return nil
+}
+
+func getCalls(fq FilterQuery) ([]Call, error) {
+	var calls []Call
+	r := db.Find(&calls, datatypes.JSONQuery("payload").HasKey(fq.Key))
+	return calls, r.Error
 }
 
 func registerCall(c Call) error {

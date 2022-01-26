@@ -9,6 +9,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/jinzhu/gorm/dialects/postgres"
+	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -35,8 +36,36 @@ func TestRegisterCall(t *testing.T) {
 
 	for _, test := range tests {
 		err := registerCall(test.input)
-		spew.Dump(err)
 		assert.Equal(t, err != nil, test.expectErr)
+	}
+
+}
+
+func TestGetCalls(t *testing.T) {
+
+	type test struct {
+		fq          FilterQuery
+		expectErr   bool
+		expectedLen int
+	}
+
+	testKey := uuid.NewV1().String()
+
+	err := registerCall(Call{Payload: postgres.Jsonb{RawMessage: json.RawMessage(fmt.Sprintf(`{"%s": "am_sheep"}`, testKey))}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []test{
+		{fq: FilterQuery{Key: testKey, Organisation: "testorg", Repository: "testrepo"}, expectErr: false, expectedLen: 1},
+		{fq: FilterQuery{Key: "moot", Organisation: "testorg", Repository: "testrepo"}, expectErr: false, expectedLen: 0},
+	}
+
+	for _, test := range tests {
+		cs, err := getCalls(test.fq)
+		spew.Dump(cs)
+		assert.Equal(t, test.expectedLen, len(cs))
+		assert.Equal(t, test.expectErr, err != nil)
 	}
 
 }

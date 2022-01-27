@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"time"
 
+	docs "github.com/datarootsio/phonehome/docs"
 	"github.com/gin-gonic/gin"
 	pgd "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"gorm.io/datatypes"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -113,7 +116,11 @@ func registerCall(c Call) error {
 
 func buildServer() *gin.Engine {
 	r := gin.Default()
-	r.POST("/:user/:repository")
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	v1 := r.Group("/api/v1")
+	v1.POST("/:user/:repository")
+	v1.GET("/:user/:repository/count")
+	v1.GET("/openapi/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	return r
 }
 
@@ -152,13 +159,4 @@ func InitConfig() {
 	}
 
 	viper.MergeConfigMap(sec.AllSettings())
-}
-
-func main() {
-	InitConfig()
-	if err := InitDBConn(); err != nil {
-		log.Fatal().Err(err).Msg("cannot connect to db")
-	}
-	// g := buildServer()
-	// g.Run()
 }

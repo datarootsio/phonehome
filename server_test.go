@@ -50,15 +50,17 @@ func TestGetCalls(t *testing.T) {
 	}
 
 	testKey := uuid.NewV1().String()
+	testOrg := uuid.NewV1().String()
+	testRepo := uuid.NewV1().String()
 
-	err := registerCall(Call{Payload: postgres.Jsonb{RawMessage: json.RawMessage(fmt.Sprintf(`{"%s": "am_sheep"}`, testKey))}})
+	err := registerCall(Call{Organisation: testOrg, Repository: testRepo, Payload: postgres.Jsonb{RawMessage: json.RawMessage(fmt.Sprintf(`{"%s": "am_sheep"}`, testKey))}})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	tests := []test{
-		{fq: FilterQuery{Key: testKey, Organisation: "testorg", Repository: "testrepo"}, expectErr: false, expectedLen: 1},
-		{fq: FilterQuery{Key: "moot", Organisation: "testorg", Repository: "testrepo"}, expectErr: false, expectedLen: 0},
+		{fq: FilterQuery{Key: testKey, Organisation: testOrg, Repository: testRepo}, expectErr: false, expectedLen: 1},
+		{fq: FilterQuery{Key: "moot", Organisation: testOrg, Repository: testRepo}, expectErr: false, expectedLen: 0},
 	}
 
 	for _, test := range tests {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"gorm.io/datatypes"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var db *gorm.DB
@@ -20,8 +22,8 @@ type Call struct {
 	ID           uint `gorm:"primaryKey"`
 	Timestamp    time.Time
 	Payload      pgd.Jsonb `gorm:"type:jsonb"`
-	Organisation string
-	Repository   string
+	Organisation string    `gorm:"not null"`
+	Repository   string    `gorm:"not null"`
 }
 
 type FilterQuery struct {
@@ -41,7 +43,28 @@ func autoMigrate() error {
 
 func getCalls(fq FilterQuery) ([]Call, error) {
 	var calls []Call
-	r := db.Find(&calls, datatypes.JSONQuery("payload").HasKey(fq.Key))
+	var gq *gorm.DB
+
+	gq = db
+
+	if fq.Organisation == "" || fq.Repository == "" {
+		return calls, errors.New("please specify organisation and repository")
+	}
+	gq = gq.Where("organisation = ? AND repository = ?", fq.Organisation, fq.Repository)
+
+	if fq.Key != "" {
+		gq = gq.Where(datatypes.JSONQuery("payload").HasKey(fq.Key))
+	}
+
+	if fq.FromDate != "" {
+		gq = gq.Where("from_date >= ?", fq.FromDate)
+	}
+
+	if fq.ToDate != "" {
+		gq = gq.Where("to_date < ?", fq.ToDate)
+	}
+
+	r := gq.Find(&calls)
 	return calls, r.Error
 }
 
@@ -68,7 +91,7 @@ func InitDBConn() error {
 		viper.GetString("PG_DATABASE"),
 		viper.GetInt("PG_PORT"))
 
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
 	if err != nil {
 		return err
 	}

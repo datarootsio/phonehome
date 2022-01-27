@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
@@ -65,8 +64,43 @@ func TestGetCalls(t *testing.T) {
 
 	for _, test := range tests {
 		cs, err := getCalls(test.fq)
-		spew.Dump(cs)
 		assert.Equal(t, test.expectedLen, len(cs))
+		assert.Equal(t, test.expectErr, err != nil)
+	}
+
+}
+
+func TestCountCalls(t *testing.T) {
+
+	type test struct {
+		fq          FilterQuery
+		expectErr   bool
+		expectedLen int64
+	}
+
+	testKey := uuid.NewV1().String()
+	testKey2 := uuid.NewV1().String()
+	testOrg := uuid.NewV1().String()
+	testRepo := uuid.NewV1().String()
+
+	// run this twice to know what to expect
+	err := registerCall(Call{Organisation: testOrg, Repository: testRepo, Payload: postgres.Jsonb{RawMessage: json.RawMessage(fmt.Sprintf(`{"%s": "am_sheep"}`, testKey))}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = registerCall(Call{Organisation: testOrg, Repository: testRepo, Payload: postgres.Jsonb{RawMessage: json.RawMessage(fmt.Sprintf(`{"%s": "am_sheep"}`, testKey))}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []test{
+		{fq: FilterQuery{Key: testKey, Organisation: testOrg, Repository: testRepo}, expectErr: false, expectedLen: 2},
+		{fq: FilterQuery{Key: testKey2, Organisation: testOrg, Repository: testRepo}, expectErr: false, expectedLen: 0},
+	}
+
+	for _, test := range tests {
+		cc, err := countCalls(test.fq)
+		assert.Equal(t, test.expectedLen, cc.Count)
 		assert.Equal(t, test.expectErr, err != nil)
 	}
 

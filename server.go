@@ -26,6 +26,11 @@ type Call struct {
 	Repository   string    `gorm:"not null"`
 }
 
+type CallCount struct {
+	Count int64
+	Query FilterQuery
+}
+
 type FilterQuery struct {
 	Key          string
 	FromDate     string
@@ -41,14 +46,13 @@ func autoMigrate() error {
 	return nil
 }
 
-func getCalls(fq FilterQuery) ([]Call, error) {
-	var calls []Call
+func callsQueryBuilder(fq FilterQuery) (*gorm.DB, error) {
 	var gq *gorm.DB
 
 	gq = db
 
 	if fq.Organisation == "" || fq.Repository == "" {
-		return calls, errors.New("please specify organisation and repository")
+		return nil, errors.New("please specify organisation and repository")
 	}
 	gq = gq.Where("organisation = ? AND repository = ?", fq.Organisation, fq.Repository)
 
@@ -62,6 +66,37 @@ func getCalls(fq FilterQuery) ([]Call, error) {
 
 	if fq.ToDate != "" {
 		gq = gq.Where("to_date < ?", fq.ToDate)
+	}
+
+	return gq, nil
+}
+
+func countCalls(fq FilterQuery) (CallCount, error) {
+	var count int64
+	var cc CallCount
+
+	gq, err := callsQueryBuilder(fq)
+	if err != nil {
+		return cc, nil
+	}
+
+	result := gq.Model(&Call{}).Count(&count)
+	if result.Error != nil {
+		return cc, result.Error
+	}
+	return CallCount{
+		Query: fq,
+		Count: count,
+	}, nil
+
+}
+
+func getCalls(fq FilterQuery) ([]Call, error) {
+	var calls []Call
+
+	gq, err := callsQueryBuilder(fq)
+	if err != nil {
+		return calls, err
 	}
 
 	r := gq.Find(&calls)

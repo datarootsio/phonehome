@@ -8,7 +8,8 @@
     "build": "npm run build:tailwind && rollup -c",
     "start": "sirv public",
     "serve": "serve public -p 80",
-    "dev": "concurrently \"rollup -c -w\" \"npm run watch:tailwind\""
+    "dev": "concurrently \"rollup -c -w\" \"npm run watch:tailwind\"",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",

@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	pgd "github.com/jinzhu/gorm/dialects/postgres"
@@ -23,12 +22,14 @@ import (
 
 var db *gorm.DB
 
+const getCallsLimit = 3000
+
 type Call struct {
-	ID           uint `gorm:"primaryKey"`
+	ID           uint `gorm:"primaryKey" json:"-"`
 	Timestamp    time.Time
-	Payload      pgd.Jsonb `gorm:"type:jsonb"`
-	Organisation string    `gorm:"not null"`
-	Repository   string    `gorm:"not null"`
+	Payload      pgd.Jsonb `gorm:"type:jsonb" json:"payload"`
+	Organisation string    `gorm:"not null" json:"organisation"`
+	Repository   string    `gorm:"not null" json:"repository"`
 }
 
 type CallCount struct {
@@ -37,6 +38,7 @@ type CallCount struct {
 }
 
 type FilterQuery struct {
+	GroupBy      string `json:"group_by,omitempty"`
 	Key          string `json:"key,omitempty"`
 	FromDate     string `json:"from_date,omitempty"`
 	ToDate       string `json:"to_date,omitempty"`
@@ -76,24 +78,20 @@ func callsQueryBuilder(fq FilterQuery) (*gorm.DB, error) {
 	return gq, nil
 }
 
-func getCountCalls(fq FilterQuery) (CallCount, error) {
+func getCountCalls(fq FilterQuery) (int64, error) {
 	var count int64
-	var cc CallCount
 
 	gq, err := callsQueryBuilder(fq)
 	if err != nil {
-		return cc, nil
+		return count, nil
 	}
 
 	result := gq.Model(&Call{}).Count(&count)
 	if result.Error != nil {
-		return cc, result.Error
+		return count, result.Error
 	}
-	return CallCount{
-		Query: fq,
-		Count: count,
-	}, nil
 
+	return count, nil
 }
 
 func getCountCallsHandler(c *gin.Context) {
@@ -101,13 +99,16 @@ func getCountCallsHandler(c *gin.Context) {
 	c.ShouldBind(&fq)
 	c.ShouldBindUri(&fq)
 
-	r, err := getCountCalls(fq)
+	count, err := getCountCalls(fq)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	spew.Dump(&fq)
-	c.JSON(200, r)
+
+	c.JSON(200, gin.H{
+		"query": fq,
+		"data":  count,
+	})
 }
 
 func getCalls(fq FilterQuery) ([]Call, error) {
@@ -118,7 +119,7 @@ func getCalls(fq FilterQuery) ([]Call, error) {
 		return calls, err
 	}
 
-	r := gq.Find(&calls)
+	r := gq.Find(&calls).Limit(getCallsLimit)
 	return calls, r.Error
 }
 
@@ -127,9 +128,15 @@ func getCallsHandler(c *gin.Context) {
 	c.ShouldBind(&fq)
 	c.ShouldBindUri(&fq)
 
-	spew.Dump(&fq)
+	cs, err := getCalls(fq)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(200, gin.H{
-		"message": "pong",
+		"query": fq,
+		"data":  cs,
 	})
 }
 
@@ -137,6 +144,9 @@ func registerCall(c Call) error {
 	if !json.Valid(c.Payload.RawMessage) {
 		return fmt.Errorf("%s is invalid JSON", c.Payload.RawMessage)
 	}
+
+	c.Timestamp = time.Now()
+
 	result := db.Create(&c)
 	return result.Error
 }

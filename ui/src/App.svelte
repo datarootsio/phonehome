@@ -10,9 +10,16 @@
     ],
   };
 
-const fetchData = fetch('http://localhost:8888/testorg/testrepo/count')
+
+let orgRepo = "datarootsio/phonehome"
+
+const goButton = () => {
+  let [org, repo] = orgRepo.split("/")
+  
+  fetch(`http://localhost:8888/${org}/${repo}/count`)
   .then(response => response.json())
   .then(data => console.log(data));
+}
 
 </script>
 
@@ -51,13 +58,14 @@ const fetchData = fetch('http://localhost:8888/testorg/testrepo/count')
         </label>
         <div>
           <input
+          bind:value={orgRepo}
             class="shadow appearance-none border rounded w-fill py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-64"
             id="username"
             type="text"
             placeholder="datarootsio/phonehome"
           />
           <button
-            class="inline bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded"
+            class="inline bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded" on:click={goButton}
           >
             Go
           </button>

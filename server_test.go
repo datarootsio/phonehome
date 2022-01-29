@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/jinzhu/gorm/dialects/postgres"
 	uuid "github.com/satori/go.uuid"
@@ -29,8 +28,8 @@ func TestRegisterCall(t *testing.T) {
 	}
 
 	tests := []test{
-		{input: Call{Timestamp: time.Now(), Payload: postgres.Jsonb{RawMessage: json.RawMessage(`{"blaat": 0}`)}, Organisation: "testorg", Repository: "testrepo"}, expectErr: false},
-		{input: Call{Timestamp: time.Now(), Payload: postgres.Jsonb{RawMessage: json.RawMessage(`invalid`)}, Organisation: "testorg", Repository: "testrepo"}, expectErr: true},
+		{input: Call{Payload: postgres.Jsonb{RawMessage: json.RawMessage(`{"blaat": 0}`)}, Organisation: "testorg", Repository: "testrepo"}, expectErr: false},
+		{input: Call{Payload: postgres.Jsonb{RawMessage: json.RawMessage(`invalid`)}, Organisation: "testorg", Repository: "testrepo"}, expectErr: true},
 	}
 
 	for _, test := range tests {
@@ -100,7 +99,7 @@ func TestCountCalls(t *testing.T) {
 
 	for _, test := range tests {
 		cc, err := getCountCalls(test.fq)
-		assert.Equal(t, test.expectedLen, cc.Count)
+		assert.Equal(t, test.expectedLen, cc)
 		assert.Equal(t, test.expectErr, err != nil)
 	}
 

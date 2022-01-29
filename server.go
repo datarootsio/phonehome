@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
-	docs "github.com/datarootsio/phonehome/docs"
+	"github.com/davecgh/go-spew/spew"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	pgd "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/rs/zerolog/log"
@@ -30,16 +32,16 @@ type Call struct {
 }
 
 type CallCount struct {
-	Count int64
-	Query FilterQuery
+	Count int64       `json:"count,omitempty"`
+	Query FilterQuery `json:"query,omitempty"`
 }
 
 type FilterQuery struct {
-	Key          string
-	FromDate     string
-	ToDate       string
-	Organisation string
-	Repository   string
+	Key          string `json:"key,omitempty"`
+	FromDate     string `json:"from_date,omitempty"`
+	ToDate       string `json:"to_date,omitempty"`
+	Organisation string `uri:"organisation" binding:"required" json:"organisation,omitempty"`
+	Repository   string `uri:"repository" binding:"required"  json:"repository,omitempty"`
 }
 
 func autoMigrate() error {
@@ -74,7 +76,7 @@ func callsQueryBuilder(fq FilterQuery) (*gorm.DB, error) {
 	return gq, nil
 }
 
-func countCalls(fq FilterQuery) (CallCount, error) {
+func getCountCalls(fq FilterQuery) (CallCount, error) {
 	var count int64
 	var cc CallCount
 
@@ -94,6 +96,20 @@ func countCalls(fq FilterQuery) (CallCount, error) {
 
 }
 
+func getCountCallsHandler(c *gin.Context) {
+	var fq FilterQuery
+	c.ShouldBind(&fq)
+	c.ShouldBindUri(&fq)
+
+	r, err := getCountCalls(fq)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	spew.Dump(&fq)
+	c.JSON(200, r)
+}
+
 func getCalls(fq FilterQuery) ([]Call, error) {
 	var calls []Call
 
@@ -106,6 +122,17 @@ func getCalls(fq FilterQuery) ([]Call, error) {
 	return calls, r.Error
 }
 
+func getCallsHandler(c *gin.Context) {
+	var fq FilterQuery
+	c.ShouldBind(&fq)
+	c.ShouldBindUri(&fq)
+
+	spew.Dump(&fq)
+	c.JSON(200, gin.H{
+		"message": "pong",
+	})
+}
+
 func registerCall(c Call) error {
 	if !json.Valid(c.Payload.RawMessage) {
 		return fmt.Errorf("%s is invalid JSON", c.Payload.RawMessage)
@@ -116,11 +143,14 @@ func registerCall(c Call) error {
 
 func buildServer() *gin.Engine {
 	r := gin.Default()
-	docs.SwaggerInfo.BasePath = "/api/v1"
-	v1 := r.Group("/api/v1")
-	v1.POST("/:user/:repository")
-	v1.GET("/:user/:repository/count")
-	v1.GET("/openapi/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:8080"}
+	r.Use(cors.New(config))
+
+	r.GET("/:organisation/:repository", getCallsHandler)
+	r.GET("/:organisation/:repository/count", getCountCallsHandler)
+	r.GET("/openapi/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	return r
 }
 
@@ -159,4 +189,6 @@ func InitConfig() {
 	}
 
 	viper.MergeConfigMap(sec.AllSettings())
+
+	viper.SetDefault("PORT", 8888)
 }

@@ -99,7 +99,7 @@ func TestCountCalls(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		cc, err := countCalls(test.fq)
+		cc, err := getCountCalls(test.fq)
 		assert.Equal(t, test.expectedLen, cc.Count)
 		assert.Equal(t, test.expectErr, err != nil)
 	}

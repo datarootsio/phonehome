@@ -9,6 +9,11 @@
       },
     ],
   };
+
+const fetchData = fetch('http://localhost:8888/testorg/testrepo/count')
+  .then(response => response.json())
+  .then(data => console.log(data));
+
 </script>
 
 <svelte:head>
@@ -17,7 +22,7 @@
   </style>
 </svelte:head>
 
-<main class="bg-dark-primary w-full h-screen">
+<main class="bg-dark-primary w-full min-h-screen">
   <div class="text-white flex items-center justify-end w-full p-2">
     <div class="right-0">
       <span class="pr-1 text-xs">by</span>
@@ -54,7 +59,7 @@
           <button
             class="inline bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded"
           >
-            Button
+            Go
           </button>
         </div>
       </div>

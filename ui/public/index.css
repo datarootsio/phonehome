@@ -622,8 +622,8 @@ video {
   display: table;
 }
 
-.h-screen {
-  height: 100vh;
+.min-h-screen {
+  min-height: 100vh;
 }
 
 .w-24 {

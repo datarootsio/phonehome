@@ -1,6 +1,11 @@
 package main
 
-import "github.com/rs/zerolog/log"
+import (
+	"fmt"
+
+	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
+)
 
 func main() {
 	InitConfig()
@@ -8,5 +13,5 @@ func main() {
 		log.Fatal().Err(err).Msg("cannot connect to db")
 	}
 	g := buildServer()
-	g.Run(":8888")
+	g.Run(fmt.Sprintf(":%s", viper.GetString("PORT")))
 }

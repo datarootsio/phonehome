@@ -47,7 +47,7 @@ fs.renameSync(beforeMainJSPath, afterMainTSPath)
 const appSveltePath = path.join(projectRoot, "src", "App.svelte")
 let appFile = fs.readFileSync(appSveltePath, "utf8")
 appFile = appFile.replace("<script>", '<script lang="ts">')
-appFile = appFile.replace("export let name;", 'export let name: string;')
+// appFile = appFile.replace("export let name;", 'export let name: string;')
 fs.writeFileSync(appSveltePath, appFile)
 
 // Edit rollup config

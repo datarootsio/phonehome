@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	pgd "github.com/jinzhu/gorm/dialects/postgres"
@@ -24,6 +26,22 @@ var db *gorm.DB
 
 const getCallsLimit = 3000
 
+type BadgeInfo struct {
+	SchemaVersion int64
+	Label         string
+	Message       string
+	Color         string
+}
+
+func (bi BadgeInfo) Get(count int64) BadgeInfo {
+	bi.SchemaVersion = 1
+	bi.Label = "pings"
+	bi.Message = strconv.FormatInt(count, 10)
+	bi.Color = "brightgreen"
+
+	return bi
+}
+
 type Call struct {
 	ID           uint `gorm:"primaryKey" json:"-"`
 	Timestamp    time.Time
@@ -32,18 +50,47 @@ type Call struct {
 	Repository   string    `gorm:"not null" json:"repository"`
 }
 
-type CallCount struct {
-	Count int64       `json:"count,omitempty"`
-	Query FilterQuery `json:"query,omitempty"`
+type DayCounts []struct {
+	Date  time.Time `json:"date,omitempty"`
+	Count int64     `json:"count,omitempty"`
 }
 
+func (dc DayCounts) MarshalJSON() ([]byte, error) {
+	type dcr struct {
+		Date  string `json:"date"`
+		Count int64  `json:"count"`
+	}
+
+	var dcrs = []dcr{}
+
+	const layout = "2006-01-02"
+	for _, e := range dc {
+		dcrs = append(dcrs, dcr{
+			Date:  e.Date.Format(layout),
+			Count: e.Count,
+		})
+
+	}
+
+	return json.Marshal(&dcrs)
+}
+
+type OrgRepoURI struct {
+	Organisation string `uri:"organisation" binding:"required"`
+	Repository   string `uri:"repository" binding:"required"`
+}
 type FilterQuery struct {
-	GroupBy      string `json:"group_by,omitempty"`
-	Key          string `json:"key,omitempty"`
+	GroupBy      string `form:"group_by" json:"group_by,omitempty"`
+	Key          string `form:"key" json:"key,omitempty"`
 	FromDate     string `json:"from_date,omitempty"`
 	ToDate       string `json:"to_date,omitempty"`
-	Organisation string `uri:"organisation" binding:"required" json:"organisation,omitempty"`
-	Repository   string `uri:"repository" binding:"required"  json:"repository,omitempty"`
+	Organisation string `json:"organisation,omitempty"`
+	Repository   string `json:"repository,omitempty"`
+}
+
+func (fq *FilterQuery) AddOrgRepo(or OrgRepoURI) {
+	fq.Organisation = or.Organisation
+	fq.Repository = or.Repository
 }
 
 func autoMigrate() error {
@@ -94,21 +141,85 @@ func getCountCalls(fq FilterQuery) (int64, error) {
 	return count, nil
 }
 
-func getCountCallsHandler(c *gin.Context) {
-	var fq FilterQuery
-	c.ShouldBind(&fq)
-	c.ShouldBindUri(&fq)
+func getCountCallsByDate(fq FilterQuery) (DayCounts, error) {
+	dc := DayCounts{}
+
+	res := db.Raw(`
+	select timestamp::date as date, count(*) 
+	from calls
+	group by timestamp::date
+	order by timestamp::date ASC
+	`).Scan(&dc)
+	if res.Error != nil {
+		return dc, res.Error
+	}
+
+	return dc, nil
+}
+
+func getCountCallsBadgeHandler(c *gin.Context) {
+	var or OrgRepoURI
+	if err := c.ShouldBindUri(&or); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+
+	}
+
+	fq := FilterQuery{}
+	fq.AddOrgRepo(or)
 
 	count, err := getCountCalls(fq)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	bi := BadgeInfo{}.Get(count)
 
-	c.JSON(200, gin.H{
-		"query": fq,
-		"data":  count,
-	})
+	c.JSON(200, bi)
+
+}
+
+func getCountCallsHandler(c *gin.Context) {
+	var fq FilterQuery
+	var or OrgRepoURI
+	resp := gin.H{}
+
+	c.ShouldBind(&fq)
+	if err := c.ShouldBindUri(&or); err != nil {
+		resp["error"] = err.Error()
+		c.JSON(http.StatusBadRequest, resp)
+		return
+
+	}
+
+	fq.Organisation = or.Organisation
+	fq.Repository = or.Repository
+	resp["query"] = fq
+
+	switch fq.GroupBy {
+	case "":
+		count, err := getCountCalls(fq)
+		if err != nil {
+			resp["error"] = err.Error()
+			c.JSON(http.StatusBadRequest, resp)
+			return
+		}
+		resp["data"] = count
+		c.JSON(200, resp)
+	case "day":
+		spew.Dump("day")
+		dc, err := getCountCallsByDate(fq)
+		if err != nil {
+			resp["error"] = err.Error()
+			c.JSON(http.StatusBadRequest, resp)
+			return
+		}
+		resp["data"] = dc
+		c.JSON(200, resp)
+	default:
+		resp["error"] = fmt.Sprintf(`group_by key '%s' not supported`, fq.GroupBy)
+		c.JSON(http.StatusBadRequest, resp)
+	}
 }
 
 func getCalls(fq FilterQuery) ([]Call, error) {
@@ -161,6 +272,7 @@ func buildServer() *gin.Engine {
 	r.GET("/:organisation/:repository", getCallsHandler)
 	r.GET("/:organisation/:repository/count", getCountCallsHandler)
 	r.GET("/openapi/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	r.GET("/:organisation/:repository/count/badge", getCountCallsBadgeHandler)
 	return r
 }
 

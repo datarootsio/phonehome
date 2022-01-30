@@ -1,7 +1,7 @@
-<script>
+<script lang="ts">
   import Chart from "svelte-frappe-charts";
 
-  let data = {
+  let cdata = {
     labels: ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"],
     datasets: [
       {
@@ -10,17 +10,34 @@
     ],
   };
 
+  let orgRepo = "testorg/testrepo";
+  // let goButton = () => 3/
+  const goButton = () => {
+    let [org, repo] = orgRepo.split("/");
 
-let orgRepo = "datarootsio/phonehome"
+    fetch(`http://localhost:8888/${org}/${repo}/count`)
+      .then((response) => response.json())
+      .then((data) => console.log(data));
 
-const goButton = () => {
-  let [org, repo] = orgRepo.split("/")
-  
-  fetch(`http://localhost:8888/${org}/${repo}/count`)
-  .then(response => response.json())
-  .then(data => console.log(data));
-}
+    fetch(`http://localhost:8888/${org}/${repo}/count?group_by=day`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(22, data);
 
+        let dates = data.data.map((x) => x.date);
+        let counts = data.data.map((x) => x.count);
+
+        cdata.labels = dates;
+        cdata.datasets = [
+          {
+            values: counts,
+          },
+        ];
+      });
+  };
+
+  let usageBadgeSrc = (count) =>
+    `https://img.shields.io/badge/dynamic/json?color=green&label=usage&query=data&url=https%3A%2F%2Fapi.dataroots.io%2Fv1%2Fcheek%2Ftriggered`;
 </script>
 
 <svelte:head>
@@ -58,14 +75,15 @@ const goButton = () => {
         </label>
         <div>
           <input
-          bind:value={orgRepo}
+            bind:value={orgRepo}
             class="shadow appearance-none border rounded w-fill py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline w-64"
             id="username"
             type="text"
             placeholder="datarootsio/phonehome"
           />
           <button
-            class="inline bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded" on:click={goButton}
+            class="inline bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded"
+            on:click={goButton}
           >
             Go
           </button>
@@ -73,7 +91,8 @@ const goButton = () => {
       </div>
 
       <div class="pt-12">
-        <Chart {data} type="line" />
+        <img alt="total-count" src={usageBadgeSrc()} />
+        <Chart data={cdata} type="line" />
       </div>
     </div>
   </div>

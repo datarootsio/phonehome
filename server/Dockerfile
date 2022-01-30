@@ -1,4 +1,4 @@
-FROM golang:1.16-alpine
+FROM golang:1.16-alpine as build
 COPY . /app
 WORKDIR /app
 RUN CGO_ENABLED=0 go build -o phonehome .
@@ -6,6 +6,6 @@ RUN CGO_ENABLED=0 go build -o phonehome .
 FROM alpine:latest  
 RUN apk --no-cache add ca-certificates
 WORKDIR /app
-COPY --from=0 /app/phonehome ./
-COPY --from=0 /app/settings.yaml ./
+COPY --from=build /app/phonehome ./
+COPY --from=build /app/settings.yaml ./
 CMD ["./phonehome"]  

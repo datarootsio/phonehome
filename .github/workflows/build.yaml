@@ -40,6 +40,8 @@ jobs:
       - run: apt-get update && apt-get install -y ca-certificates
       - run: go test ./...
         working-directory: ./server
+        env:
+          CGO_ENABLED: 0
 
   deploy-docker:
     needs: tests

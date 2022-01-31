@@ -81,7 +81,7 @@ resource "google_cloud_run_service" "cloudrun_server" {
         }
 
         env {
-          name = "PG_INSTANCE_CONNECTION_NAME"
+          name  = "PG_INSTANCE_CONNECTION_NAME"
           value = google_sql_database_instance.instance.connection_name
         }
         env {
@@ -103,13 +103,14 @@ resource "google_cloud_run_service" "cloudrun_server" {
 
       }
     }
+    metadata {
+      annotations = {
+        "run.googleapis.com/cloudsql-instances" = google_sql_database_instance.instance.connection_name
+      }
+    }
+
   }
 
-  metadata {
-    annotations = {
-      "run.googleapis.com/cloudsql-instances" = google_sql_database_instance.instance.connection_name
-    }
-  }
 
 
   traffic {
@@ -153,17 +154,17 @@ data "google_iam_policy" "noauth" {
 }
 
 resource "google_cloud_run_service_iam_policy" "noauth_server" {
-  location    = google_cloud_run_service.cloudrun_server.location
-  project     = google_cloud_run_service.cloudrun_server.project
-  service     = google_cloud_run_service.cloudrun_server.name
+  location = google_cloud_run_service.cloudrun_server.location
+  project  = google_cloud_run_service.cloudrun_server.project
+  service  = google_cloud_run_service.cloudrun_server.name
 
   policy_data = data.google_iam_policy.noauth.policy_data
 }
 
 resource "google_cloud_run_service_iam_policy" "noauth_ui" {
-  location    = google_cloud_run_service.cloudrun_ui.location
-  project     = google_cloud_run_service.cloudrun_ui.project
-  service     = google_cloud_run_service.cloudrun_ui.name
+  location = google_cloud_run_service.cloudrun_ui.location
+  project  = google_cloud_run_service.cloudrun_ui.project
+  service  = google_cloud_run_service.cloudrun_ui.name
 
   policy_data = data.google_iam_policy.noauth.policy_data
 }

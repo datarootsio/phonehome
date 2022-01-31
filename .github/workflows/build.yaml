@@ -49,8 +49,8 @@ jobs:
         run: gcloud auth configure-docker --quiet
       - name: Define Docker tag
         run: echo "DOCKER_TAG=$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
-      - working-directory: cd ${{ matrix.service}}
       - name: Build Docker image
+        working-directory: cd ${{ matrix.service}}
         run: |
           docker build \
             -f "${{ matrix.service}}/Dockerfile" \

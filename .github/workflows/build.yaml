@@ -66,3 +66,28 @@ jobs:
             europe-west1-docker.pkg.dev/${{ env.gcp_project_id }}/core/${{ matrix.service }}:${{ env.DOCKER_TAG }} \
             europe-west1-docker.pkg.dev/${{ env.gcp_project_id }}/core/${{ matrix.service }}:latest && \
             docker push europe-west1-docker.pkg.dev/${{ env.gcp_project_id }}/core/${{ matrix.service }}:latest
+
+  terraform:
+    name: 'Terraform Apply'
+    needs: deploy-docker
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - uses: actions/checkout@v2
+      - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.14
+      - name: Define current infra version
+        run: echo "INFRA_VERSION=$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_TF_SA_CREDENTIALS }}
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_TF_SA_CREDENTIALS }}

@@ -7,13 +7,11 @@ terraform {
 
 
 provider "google" {
-  credentials = file("../.sa.creds.json")
   project     = var.gcp_project_id
   region      = "europe-west1"
 }
 
 provider "google-beta" {
-  credentials = file("../.sa.creds.json")
   project     = var.gcp_project_id
   region      = "europe-west1"
 }

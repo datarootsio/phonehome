@@ -9,3 +9,7 @@ variable "pg_main_pass_secret" {
   default = "pg-main-pass"
 }
 
+variable "gcp_project_id" {
+  type    = string
+  default = "phonehome-339613"
+}

@@ -3,7 +3,6 @@ variable "pg_main_user" {
   default = "admin"
 }
 
-
 variable "pg_main_pass_secret" {
   type    = string
   default = "pg-main-pass"
@@ -12,4 +11,10 @@ variable "pg_main_pass_secret" {
 variable "gcp_project_id" {
   type    = string
   default = "phonehome-339613"
+}
+
+variable "current_version" {
+  default     = "develop"
+  type        = string
+  description = "A version identifying the infrastructure that will be deployed. Currently should point to the commit hash."
 }

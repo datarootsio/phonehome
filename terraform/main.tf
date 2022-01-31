@@ -59,3 +59,43 @@ resource "google_artifact_registry_repository" "repo_server" {
   description = "core ph repo"
   format = "DOCKER"
 }
+
+
+/* CLOUD RUN */
+
+resource "google_cloud_run_service" "cloudrun_server" {
+  name     = "server"
+  location = "europe-west1"
+
+  template {
+    spec {
+      containers {
+        image = "europe-west1-docker.pkg.dev/phonehome-339613/core/server:${var.current_version}"
+      }
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}
+
+
+resource "google_cloud_run_service" "cloudrun_ui" {
+  name     = "ui"
+  location = "europe-west1"
+
+  template {
+    spec {
+      containers {
+        image = "europe-west1-docker.pkg.dev/phonehome-339613/core/ui:${var.current_version}"
+      }
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}

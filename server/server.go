@@ -278,12 +278,24 @@ func buildServer() *gin.Engine {
 
 func InitDBConn() error {
 	var err error
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Europe/Brussels",
-		viper.GetString("PG_HOST"),
-		viper.GetString("PG_USER"),
-		viper.GetString("PG_PASS"),
-		viper.GetString("PG_DATABASE"),
-		viper.GetInt("PG_PORT"))
+	var dsn string
+
+	if viper.GetString("PG_SOCKET_DIR") == "" {
+
+		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Europe/Brussels",
+			viper.GetString("PG_HOST"),
+			viper.GetString("PG_USER"),
+			viper.GetString("PG_PASS"),
+			viper.GetString("PG_DATABASE"),
+			viper.GetInt("PG_PORT"))
+	} else {
+		dsn = fmt.Sprintf("host=%s/%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Europe/Brussels",
+			viper.GetString("PG_SOCKET_DIR"),
+			viper.GetString("PG_INSTANCE_CONNECTION_NAME"),
+			viper.GetString("PG_USER"),
+			viper.GetString("PG_PASS"),
+			viper.GetString("PG_DATABASE"))
+	}
 
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Info)})
 	if err != nil {

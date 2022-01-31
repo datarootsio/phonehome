@@ -7,5 +7,4 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /app
 COPY --from=build /app/phonehome ./
-COPY settings.yaml ./
 CMD ["./phonehome"]  

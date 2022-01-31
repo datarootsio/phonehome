@@ -98,4 +98,5 @@ jobs:
         id: apply
         run: terraform apply -auto-approve
         env:
+          TF_VAR_current_version: ${{ env.INFRA_VERSION }}
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_TF_SA_CREDENTIALS }}

@@ -306,7 +306,7 @@ func InitConfig() {
 	viper.AddConfigPath("..")
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatal().Err(err).Msgf("cant read settings file")
+		log.Warn().Err(err).Msgf("can't read settings file")
 	}
 
 	sec := viper.New()
@@ -315,7 +315,7 @@ func InitConfig() {
 	sec.AddConfigPath(".")
 	sec.AddConfigPath("..")
 	if err := sec.ReadInConfig(); err != nil {
-		log.Debug().Msgf("not process secrets file, %v", err)
+		log.Debug().Err(err).Msg("can't process secrets file")
 	}
 
 	viper.MergeConfigMap(sec.AllSettings())

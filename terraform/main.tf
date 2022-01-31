@@ -57,16 +57,7 @@ resource "google_artifact_registry_repository" "repo_server" {
   provider = google-beta
 
   location = "europe-west1"
-  repository_id = "server"
-  description = "go backend of ph"
-  format = "DOCKER"
-}
-
-resource "google_artifact_registry_repository" "repo_ui" {
-  provider = google-beta
-
-  location = "europe-west1"
-  repository_id = "ui"
-  description = "svelte ui of ph"
+  repository_id = "core"
+  description = "core ph repo"
   format = "DOCKER"
 }

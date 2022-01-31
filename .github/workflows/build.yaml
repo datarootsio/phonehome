@@ -56,13 +56,13 @@ jobs:
         working-directory: ./${{matrix.service}}
         run: |
           docker build \
-            -t europe-west1-docker.pkg.dev/${{ env.gcp_project_id }}/${{ matrix.service }}/${{ matrix.service }}:${{ env.DOCKER_TAG }} \
+            -t europe-west1-docker.pkg.dev/${{ env.gcp_project_id }}/core/${{ matrix.service }}:${{ env.DOCKER_TAG }} \
             .
       - name: Push Docker image (commit-tagged)
-        run: docker push europe-west1-docker.pkg.dev/${{ env.gcp_project_id }}/${{ matrix.service }}/${{ matrix.service }}:${{ env.DOCKER_TAG }}
+        run: docker push europe-west1-docker.pkg.dev/${{ env.gcp_project_id }}/core/${{ matrix.service }}:${{ env.DOCKER_TAG }}
       - name: Push Docker image (latest)
         run: |
           docker tag \
-            europe-west1-docker.pkg.dev/${{ env.gcp_project_id }}/${{ matrix.service }}/${{ matrix.service }}:${{ env.DOCKER_TAG }} \
-            europe-west1-docker.pkg.dev/${{ env.gcp_project_id }}/${{ matrix.service }}/${{ matrix.service }}:latest && \
-            docker push europe-west1-docker.pkg.dev/${{ env.gcp_project_id }}/${{ matrix.service }}/${{ matrix.service }}:latest
+            europe-west1-docker.pkg.dev/${{ env.gcp_project_id }}/core/${{ matrix.service }}:${{ env.DOCKER_TAG }} \
+            europe-west1-docker.pkg.dev/${{ env.gcp_project_id }}/core/${{ matrix.service }}:latest && \
+            docker push europe-west1-docker.pkg.dev/${{ env.gcp_project_id }}/core/${{ matrix.service }}:latest

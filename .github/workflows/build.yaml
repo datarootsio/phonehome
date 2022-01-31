@@ -56,7 +56,6 @@ jobs:
         working-directory: ./${{matrix.service}}
         run: |
           docker build \
-            -f "${{ matrix.service}}/Dockerfile" \
             -t europe-west1-docker.pkg.dev/${{ env.gcp_project_id }}/${{ matrix.service }}/${{ matrix.service }}:${{ env.DOCKER_TAG }} \
             .
       - name: Push Docker image (commit-tagged)

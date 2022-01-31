@@ -20,7 +20,7 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_DB: ${{ env.PG_HOST }}
+          POSTGRES_DB: ${{ env.PG_DATABASE }}
           POSTGRES_PASSWORD: ${{ env.PG_PASS }}
           POSTGRES_PORT: ${{ env.PG_PORT }}
           POSTGRES_USER: ${{ env.PG_USER }}

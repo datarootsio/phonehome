@@ -298,14 +298,22 @@ func InitDBConn() error {
 }
 
 func InitConfig() {
-	viper.SetConfigFile("settings.yaml")
+	viper.AutomaticEnv()
+
+	viper.SetConfigName("settings")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	viper.AddConfigPath("..")
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal().Err(err).Msgf("cant read settings file")
 	}
 
 	sec := viper.New()
-	sec.SetConfigFile(".secrets.yaml")
+	sec.SetConfigName(".secrets")
+	sec.SetConfigType("yaml")
+	sec.AddConfigPath(".")
+	sec.AddConfigPath("..")
 	if err := sec.ReadInConfig(); err != nil {
 		log.Debug().Msgf("not process secrets file, %v", err)
 	}

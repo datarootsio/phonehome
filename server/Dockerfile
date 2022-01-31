@@ -1,5 +1,5 @@
 FROM golang:1.16-alpine as build
-COPY /server /app
+COPY . /app
 WORKDIR /app
 RUN CGO_ENABLED=0 go build -o phonehome .
 

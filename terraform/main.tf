@@ -168,3 +168,137 @@ resource "google_cloud_run_service_iam_policy" "noauth_ui" {
 
   policy_data = data.google_iam_policy.noauth.policy_data
 }
+
+
+/* load balancer config server */
+
+resource "google_compute_region_network_endpoint_group" "server_neg" {
+  name                  = "server-neg"
+  network_endpoint_type = "SERVERLESS"
+  region                = "europe-west1"
+  cloud_run {
+    service = google_cloud_run_service.cloudrun_server.name
+  }
+}
+
+module "lb_http_server" {
+  source  = "GoogleCloudPlatform/lb-http/google//modules/serverless_negs"
+  version = "~> 4.5"
+
+  project = var.gcp_project_id
+  name    = "default-lb-server"
+
+  managed_ssl_certificate_domains = ["api.phonehome.dev"]
+  ssl                             = true
+  https_redirect                  = true
+
+  backends = {
+    server = {
+      description             = null
+      enable_cdn              = false
+      custom_request_headers  = null
+      custom_response_headers = null
+      security_policy         = null
+
+      log_config = {
+        enable      = true
+        sample_rate = 1.0
+      }
+
+      groups = [
+        {
+          group = google_compute_region_network_endpoint_group.server_neg.id
+        }
+      ]
+
+      iap_config = {
+        enable               = false
+        oauth2_client_id     = null
+        oauth2_client_secret = null
+      }
+
+    }
+  }
+}
+
+
+
+/* load balancer config ui */
+
+resource "google_compute_region_network_endpoint_group" "ui_neg" {
+  name                  = "ui-neg"
+  network_endpoint_type = "SERVERLESS"
+  region                = "europe-west1"
+  cloud_run {
+    service = google_cloud_run_service.cloudrun_ui.name
+  }
+}
+
+module "lb_http_ui" {
+  source  = "GoogleCloudPlatform/lb-http/google//modules/serverless_negs"
+  version = "~> 4.5"
+
+  project = var.gcp_project_id
+  name    = "default-lb-ui"
+
+  managed_ssl_certificate_domains = ["phonehome.dev"]
+  ssl                             = true
+  https_redirect                  = true
+
+  backends = {
+    ui = {
+      description             = null
+      enable_cdn              = false
+      custom_request_headers  = null
+      custom_response_headers = null
+      security_policy         = null
+
+      log_config = {
+        enable      = true
+        sample_rate = 1.0
+      }
+
+      groups = [
+        {
+          group = google_compute_region_network_endpoint_group.ui_neg.id
+        }
+      ]
+
+      iap_config = {
+        enable               = false
+        oauth2_client_id     = null
+        oauth2_client_secret = null
+      }
+
+    }
+  }
+}
+
+
+/* dns stuff */
+
+resource "google_dns_managed_zone" "ph_root_zone" {
+  name        = "phonehome-dev"
+  dns_name    = "phonehome.dev."
+  description = "phonehome.devs main zone"
+}
+
+resource "google_dns_record_set" "phonehome_zone_a_record_ui" {
+  name = google_dns_managed_zone.ph_root_zone.dns_name
+  type = "A"
+  ttl  = "3600"
+
+  managed_zone = google_dns_managed_zone.ph_root_zone.name
+
+  rrdatas = [module.lb_http_ui.external_ip]
+}
+
+resource "google_dns_record_set" "phonehome_zone_a_record_server" {
+  name = "api.${google_dns_managed_zone.ph_root_zone.dns_name}"
+  type = "A"
+  ttl  = "3600"
+
+  managed_zone = google_dns_managed_zone.ph_root_zone.name
+
+  rrdatas = [module.lb_http_server.external_ip]
+}

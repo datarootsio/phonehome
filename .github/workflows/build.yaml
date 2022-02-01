@@ -96,7 +96,7 @@ jobs:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_TF_SA_CREDENTIALS }}
       - name: Terraform Apply
         id: apply
-        run: terraform apply -auto-approve
+        run: terraform apply -var-file=default.tfvars -auto-approve
         env:
           TF_VAR_current_version: ${{ env.INFRA_VERSION }}
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_TF_SA_CREDENTIALS }}

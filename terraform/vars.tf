@@ -18,3 +18,12 @@ variable "current_version" {
   type        = string
   description = "A version identifying the infrastructure that will be deployed. Currently should point to the commit hash."
 }
+
+variable "phonehome_a_records" {
+  default = {
+    "@" = {
+      ttl = "3600"
+      ip  = "34.107.171.221"
+    }
+  }
+}

@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import Chart from "svelte-frappe-charts";
 
   let cdata = {
@@ -11,10 +11,7 @@
   };
 
   let orgRepo = "testorg/testrepo";
-
-  const serverURL = process.env.serverURL
-    ? process.env.serverURL
-    : "http://localhost:8888";
+  let serverURL = (process).env.serverURL;
 
   const goButton = () => {
     let [org, repo] = orgRepo.split("/");

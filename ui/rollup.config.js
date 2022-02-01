@@ -7,7 +7,8 @@ import css from 'rollup-plugin-css-only';
 import replace from '@rollup/plugin-replace';
 
 const production = !process.env.ROLLUP_WATCH;
-const serverURL = !process.env.SERVER_URL;
+const serverURL = process.env.SERVER_URL ? process.env.SERVER_URL
+	: "http://localhost:8888"
 
 function serve() {
 	let server;
@@ -40,13 +41,13 @@ export default {
 	},
 	plugins: [
 		replace({
+			preventAssignment: true,
 			process: JSON.stringify({
+				test: 3,
 				env: {
 					serverURL: serverURL
 				}
 			})
-
-
 		}),
 		svelte({
 			compilerOptions: {

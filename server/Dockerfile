@@ -7,4 +7,5 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /app
 COPY --from=build /app/phonehome ./
-CMD ["./phonehome"]  
+COPY --from=build /app/wait-for-it.sh ./
+CMD ["./phonehome"]

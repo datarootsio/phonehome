@@ -11,15 +11,19 @@
   };
 
   let orgRepo = "testorg/testrepo";
-  // let goButton = () => 3/
+
+  const serverURL = process.env.serverURL
+    ? process.env.serverURL
+    : "http://localhost:8888";
+
   const goButton = () => {
     let [org, repo] = orgRepo.split("/");
 
-    fetch(`http://localhost:8888/${org}/${repo}/count`)
+    fetch(`${serverURL}/${org}/${repo}/count`)
       .then((response) => response.json())
       .then((data) => console.log(data));
 
-    fetch(`http://localhost:8888/${org}/${repo}/count?group_by=day`)
+    fetch(`${serverURL}/${org}/${repo}/count?group_by=day`)
       .then((response) => response.json())
       .then((data) => {
         console.log(22, data);

@@ -21,6 +21,9 @@ func buildServer() *gin.Engine {
 
 	r.GET("/:organisation/:repository", getCallsHandler)
 	r.GET("/:organisation/:repository/count", getCountCallsHandler)
+	r.GET("/:organisation/:repository/count/daily", getCountCallsByDayHandler)
+
+	r.POST("/:organisation/:repository", registerCallHander)
 
 	r.StaticFile("/docs/swagger.json", "./docs/swagger.json")
 

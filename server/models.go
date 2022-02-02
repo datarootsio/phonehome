@@ -24,15 +24,30 @@ func (bi BadgeInfo) Get(count int64) BadgeInfo {
 	return bi
 }
 
-// type DefaultResp struct {
-// 	Error string      `json:"error,omitempty"`
-// 	Query FilterQuery `json:"query,omitempty"`
-// }
+type DefaultResp struct {
+	Error string      `json:"error,omitempty"`
+	Query FilterQuery `json:"query,omitempty"`
+}
 
-// type CallsResp struct {
-// 	DefaultResp
-// 	Data []Call `json:"data,omitempty"`
-// }
+type CallsResp struct {
+	DefaultResp
+	Data []Call `json:"data"`
+}
+
+type CountResp struct {
+	DefaultResp
+	Data int64 `json:"data"`
+}
+
+type DailyCountResp struct {
+	DefaultResp
+	Data DayCounts `json:"data"`
+}
+
+type RegisterResp struct {
+	Error  string `json:"error,omitempty"`
+	Status string `json:"status"`
+}
 
 type Call struct {
 	ID           uint `gorm:"primaryKey" json:"-"`
@@ -41,6 +56,8 @@ type Call struct {
 	Organisation string    `gorm:"not null" json:"organisation"`
 	Repository   string    `gorm:"not null" json:"repository"`
 }
+
+type CallPayload map[string]interface{}
 
 type DayCounts []struct {
 	Date  time.Time `json:"date,omitempty"`
@@ -53,7 +70,7 @@ func (dc DayCounts) MarshalJSON() ([]byte, error) {
 		Count int64  `json:"count"`
 	}
 
-	var dcrs = []dcr{}
+	dcrs := []dcr{}
 
 	const layout = "2006-01-02"
 	for _, e := range dc {
@@ -61,7 +78,6 @@ func (dc DayCounts) MarshalJSON() ([]byte, error) {
 			Date:  e.Date.Format(layout),
 			Count: e.Count,
 		})
-
 	}
 
 	return json.Marshal(&dcrs)
@@ -71,6 +87,7 @@ type OrgRepoURI struct {
 	Organisation string `uri:"organisation" binding:"required"`
 	Repository   string `uri:"repository" binding:"required"`
 }
+
 type FilterQuery struct {
 	GroupBy      string `form:"group_by" json:"group_by,omitempty"`
 	Key          string `form:"key" json:"key,omitempty"`

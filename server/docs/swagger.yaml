@@ -10,6 +10,39 @@ definitions:
       timestamp:
         type: string
     type: object
+  main.CallsResp:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/main.Call'
+        type: array
+      error:
+        type: string
+      query:
+        $ref: '#/definitions/main.FilterQuery'
+    type: object
+  main.FilterQuery:
+    properties:
+      from_date:
+        type: string
+      group_by:
+        type: string
+      key:
+        type: string
+      organisation:
+        type: string
+      repository:
+        type: string
+      to_date:
+        type: string
+    type: object
+  main.RegisterResp:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
 host: api.phonehome.dev
 info:
   contact:
@@ -24,9 +57,88 @@ info:
 paths:
   /:organisation/:repository:
     get:
-      consumes:
+      description: Fetch telemetry calls with optional filtering.
+      parameters:
+      - description: github organisation
+        in: path
+        name: organisation
+        required: true
+        type: string
+      - description: repository name
+        in: path
+        name: repository
+        required: true
+        type: string
+      - description: filter by key passed in POST payload
+        in: query
+        name: key
+        type: string
+      - description: from date to filter on
+        in: query
+        name: from_date
+        type: string
+      - description: to date to filter on
+        in: query
+        name: to_date
+        type: string
+      produces:
       - application/json
-      description: Fetch calls.
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.CallsResp'
+      summary: Fetch telemetry calls.
+    post:
+      description: |-
+        Register new call.
+
+        Requires a JSON body in the shape of `{"foo": "bar", "coffee": "beans"}`.
+      parameters:
+      - description: github organisation
+        in: path
+        name: organisation
+        required: true
+        type: string
+      - description: repository name
+        in: path
+        name: repository
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.RegisterResp'
+      summary: Register new telemetry call.
+  /:organisation/:repository/count:
+    get:
+      description: Count telemetry calls with optional filtering.
+      parameters:
+      - description: github organisation
+        in: path
+        name: organisation
+        required: true
+        type: string
+      - description: repository name
+        in: path
+        name: repository
+        required: true
+        type: string
+      - description: filter by key passed in POST payload
+        in: query
+        name: key
+        type: string
+      - description: from date to filter on
+        in: query
+        name: from_date
+        type: string
+      - description: to date to filter on
+        in: query
+        name: to_date
+        type: string
       produces:
       - application/json
       responses:
@@ -36,7 +148,43 @@ paths:
             items:
               $ref: '#/definitions/main.Call'
             type: array
-      summary: Fetch telemetry calls with filtering ability.
+      summary: Count telemetry calls.
+  /:organisation/:repository/count/daily:
+    get:
+      description: Count telemetry calls with optional filtering.
+      parameters:
+      - description: github organisation
+        in: path
+        name: organisation
+        required: true
+        type: string
+      - description: repository name
+        in: path
+        name: repository
+        required: true
+        type: string
+      - description: filter by key passed in POST payload
+        in: query
+        name: key
+        type: string
+      - description: from date to filter on
+        in: query
+        name: from_date
+        type: string
+      - description: to date to filter on
+        in: query
+        name: to_date
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Call'
+            type: array
+      summary: Count telemetry calls grouped by date.
 securityDefinitions:
   BasicAuth:
     type: basic

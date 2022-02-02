@@ -17,14 +17,181 @@
     "paths": {
         "/:organisation/:repository": {
             "get": {
-                "description": "Fetch calls.",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Fetch telemetry calls with optional filtering.",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Fetch telemetry calls with filtering ability.",
+                "summary": "Fetch telemetry calls.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "github organisation",
+                        "name": "organisation",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "repository name",
+                        "name": "repository",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter by key passed in POST payload",
+                        "name": "key",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "from date to filter on",
+                        "name": "from_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "to date to filter on",
+                        "name": "to_date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.CallsResp"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Register new call.\n\nRequires a JSON body in the shape of `{\"foo\": \"bar\", \"coffee\": \"beans\"}`.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Register new telemetry call.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "github organisation",
+                        "name": "organisation",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "repository name",
+                        "name": "repository",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.RegisterResp"
+                        }
+                    }
+                }
+            }
+        },
+        "/:organisation/:repository/count": {
+            "get": {
+                "description": "Count telemetry calls with optional filtering.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Count telemetry calls.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "github organisation",
+                        "name": "organisation",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "repository name",
+                        "name": "repository",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter by key passed in POST payload",
+                        "name": "key",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "from date to filter on",
+                        "name": "from_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "to date to filter on",
+                        "name": "to_date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Call"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/:organisation/:repository/count/daily": {
+            "get": {
+                "description": "Count telemetry calls with optional filtering.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Count telemetry calls grouped by date.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "github organisation",
+                        "name": "organisation",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "repository name",
+                        "name": "repository",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter by key passed in POST payload",
+                        "name": "key",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "from date to filter on",
+                        "name": "from_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "to date to filter on",
+                        "name": "to_date",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -53,6 +220,57 @@
                     "type": "string"
                 },
                 "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "main.CallsResp": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.Call"
+                    }
+                },
+                "error": {
+                    "type": "string"
+                },
+                "query": {
+                    "$ref": "#/definitions/main.FilterQuery"
+                }
+            }
+        },
+        "main.FilterQuery": {
+            "type": "object",
+            "properties": {
+                "from_date": {
+                    "type": "string"
+                },
+                "group_by": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "organisation": {
+                    "type": "string"
+                },
+                "repository": {
+                    "type": "string"
+                },
+                "to_date": {
+                    "type": "string"
+                }
+            }
+        },
+        "main.RegisterResp": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }

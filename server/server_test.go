@@ -36,11 +36,9 @@ func TestRegisterCall(t *testing.T) {
 		err := registerCall(test.input)
 		assert.Equal(t, err != nil, test.expectErr)
 	}
-
 }
 
 func TestGetCalls(t *testing.T) {
-
 	type test struct {
 		fq          FilterQuery
 		expectErr   bool
@@ -66,11 +64,9 @@ func TestGetCalls(t *testing.T) {
 		assert.Equal(t, test.expectedLen, len(cs))
 		assert.Equal(t, test.expectErr, err != nil)
 	}
-
 }
 
 func TestCountCalls(t *testing.T) {
-
 	type test struct {
 		fq          FilterQuery
 		expectErr   bool
@@ -102,5 +98,4 @@ func TestCountCalls(t *testing.T) {
 		assert.Equal(t, test.expectedLen, cc)
 		assert.Equal(t, test.expectErr, err != nil)
 	}
-
 }

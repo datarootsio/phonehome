@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 )
 
@@ -61,17 +61,26 @@ func getCountCallsBadgeHandler(c *gin.Context) {
 	bi := BadgeInfo{}.Get(count)
 
 	c.JSON(200, bi)
-
 }
 
+// @Summary      Count telemetry calls.
+// @Description  Count telemetry calls with optional filtering.
+// @Param        organisation  path   string  true   "github organisation"
+// @Param        repository    path   string  true   "repository name"
+// @Param        key           query  string  false  "filter by key passed in POST payload"
+// @Param        from_date     query  string  false  "from date to filter on"
+// @Param        to_date       query  string  false  "to date to filter on"
+// @Produce      json
+// @Success      200  {array}  Call
+// @Router       /:organisation/:repository/count [get]
 func getCountCallsHandler(c *gin.Context) {
 	var fq FilterQuery
 	var or OrgRepoURI
-	resp := gin.H{}
+	resp := CountResp{}
 
 	c.ShouldBind(&fq)
 	if err := c.ShouldBindUri(&or); err != nil {
-		resp["error"] = err.Error()
+		resp.Error = err.Error()
 		c.JSON(http.StatusBadRequest, resp)
 		return
 
@@ -79,32 +88,53 @@ func getCountCallsHandler(c *gin.Context) {
 
 	fq.Organisation = or.Organisation
 	fq.Repository = or.Repository
-	resp["query"] = fq
+	resp.Query = fq
 
-	switch fq.GroupBy {
-	case "":
-		count, err := getCountCalls(fq)
-		if err != nil {
-			resp["error"] = err.Error()
-			c.JSON(http.StatusBadRequest, resp)
-			return
-		}
-		resp["data"] = count
-		c.JSON(200, resp)
-	case "day":
-		spew.Dump("day")
-		dc, err := getCountCallsByDate(fq)
-		if err != nil {
-			resp["error"] = err.Error()
-			c.JSON(http.StatusBadRequest, resp)
-			return
-		}
-		resp["data"] = dc
-		c.JSON(200, resp)
-	default:
-		resp["error"] = fmt.Sprintf(`group_by key '%s' not supported`, fq.GroupBy)
+	count, err := getCountCalls(fq)
+	if err != nil {
+		resp.Error = err.Error()
 		c.JSON(http.StatusBadRequest, resp)
+		return
 	}
+	resp.Data = count
+	c.JSON(200, resp)
+}
+
+// @Summary      Count telemetry calls grouped by date.
+// @Description  Count telemetry calls with optional filtering.
+// @Param        organisation  path   string  true   "github organisation"
+// @Param        repository    path   string  true   "repository name"
+// @Param        key           query  string  false  "filter by key passed in POST payload"
+// @Param        from_date     query  string  false  "from date to filter on"
+// @Param        to_date       query  string  false  "to date to filter on"
+// @Produce      json
+// @Success      200  {array}  Call
+// @Router       /:organisation/:repository/count/daily [get]
+func getCountCallsByDayHandler(c *gin.Context) {
+	var fq FilterQuery
+	var or OrgRepoURI
+	resp := DailyCountResp{}
+
+	c.ShouldBind(&fq)
+	if err := c.ShouldBindUri(&or); err != nil {
+		resp.Error = err.Error()
+		c.JSON(http.StatusBadRequest, resp)
+		return
+
+	}
+
+	fq.Organisation = or.Organisation
+	fq.Repository = or.Repository
+	resp.Query = fq
+
+	dc, err := getCountCallsByDate(fq)
+	if err != nil {
+		resp.Error = err.Error()
+		c.JSON(http.StatusBadRequest, resp)
+		return
+	}
+	resp.Data = dc
+	c.JSON(200, resp)
 }
 
 func getCalls(fq FilterQuery) ([]Call, error) {
@@ -119,41 +149,92 @@ func getCalls(fq FilterQuery) ([]Call, error) {
 	return calls, r.Error
 }
 
-// @Summary Fetch telemetry calls with filtering ability.
-// @Schemes FilterQuery
-// @Description Fetch calls.
-// @Accept json
-// @Produce json
-// @Success 200 {array} Call
-// @Router /:organisation/:repository [get]
+// @Summary      Fetch telemetry calls.
+// @Description  Fetch telemetry calls with optional filtering.
+// @Param        organisation  path   string  true   "github organisation"
+// @Param        repository    path   string  true   "repository name"
+// @Param        key           query  string  false  "filter by key passed in POST payload"
+// @Param        from_date     query  string  false  "from date to filter on"
+// @Param        to_date       query  string  false  "to date to filter on"
+// @Produce      json
+// @Success      200  {object}  CallsResp
+// @Router       /:organisation/:repository [get]
 func getCallsHandler(c *gin.Context) {
 	var fq FilterQuery
 	var or OrgRepoURI
 
-	resp := gin.H{}
+	resp := CallsResp{}
 
 	c.ShouldBind(&fq)
 	if err := c.ShouldBindUri(&or); err != nil {
-		resp["error"] = err.Error()
+		resp.Error = err.Error()
 		c.JSON(http.StatusBadRequest, resp)
 		return
-
 	}
 
 	fq.Organisation = or.Organisation
 	fq.Repository = or.Repository
 
-	resp["query"] = fq
+	resp.Query = fq
 
 	cs, err := getCalls(fq)
 	if err != nil {
-		resp["error"] = err.Error()
+		resp.Error = err.Error()
 		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
 
-	resp["data"] = cs
+	resp.Data = cs
 	c.JSON(200, resp)
+}
+
+// @Summary      Register new telemetry call.
+// @Description  Register new call.
+// @Description
+// @Description  Requires a JSON body in the shape of `{"foo": "bar", "coffee": "beans"}`.
+// @Param        organisation  path   string  true   "github organisation"
+// @Param        repository    path   string  true   "repository name"
+// @Produce      json
+// @Success      200  {object}  RegisterResp
+// @Router       /:organisation/:repository [post]
+func registerCallHander(c *gin.Context) {
+	var call Call
+	var pl CallPayload
+	var resp RegisterResp
+
+	// unmarshal and remarshal to strip away nested objects
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(c.Request.Body)
+	if err := json.Unmarshal(buf.Bytes(), &pl); err != nil {
+		resp.Error = err.Error()
+		c.JSON(http.StatusBadRequest, resp)
+		return
+	}
+
+	plClean, err := json.Marshal(pl)
+	if err != nil {
+		resp.Error = err.Error()
+		c.JSON(http.StatusBadRequest, resp)
+		return
+	}
+
+	call.Payload.RawMessage = json.RawMessage(plClean)
+
+	if err := c.ShouldBind(&call); err != nil {
+		resp.Error = err.Error()
+		c.JSON(http.StatusBadRequest, resp)
+		return
+	}
+
+	if err := registerCall(call); err != nil {
+		resp.Error = err.Error()
+		c.JSON(http.StatusBadRequest, resp)
+		return
+	}
+
+	resp.Status = "ok"
+	c.JSON(200, resp)
+
 }
 
 func registerCall(c Call) error {

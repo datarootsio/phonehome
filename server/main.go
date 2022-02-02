@@ -7,17 +7,17 @@ import (
 	"github.com/spf13/viper"
 )
 
-// @title           phonehome.dev
-// @version         1.0
-// @description     KISS telemetry server for FOSS packages.
+// @title        phonehome.dev
+// @version      1.0
+// @description  KISS telemetry server for FOSS packages.
 
-// @contact.name   phomehome.dev
-// @contact.url    https://github.com/datarootsio/phonehome
+// @contact.name  phomehome.dev
+// @contact.url   https://github.com/datarootsio/phonehome
 
 // @license.name  MIT
 // @license.url   https://github.com/datarootsio/phonehome/LICENSE
 
-// @host      api.phonehome.dev
+// @host  api.phonehome.dev
 
 // @securityDefinitions.basic  BasicAuth
 func main() {

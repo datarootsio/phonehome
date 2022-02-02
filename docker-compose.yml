@@ -8,24 +8,24 @@ services:
       POSTGRES_USER: test
       POSTGRES_DB: phonehome
     ports:
-    - 5431:5431
+    - 5432:5432
   adminer:
     image: adminer
     restart: always
     ports:
-      - 8090:8090
-  ui:
-    build: ui/
-    ports:
-      - 5050:80
-  server:
-    build: server/
-    command: ["./wait-for-it.sh", "postgres:5431", "--", "phonehome"]
-    environment:
-      PG_HOST: localhost
-      PG_PORT: 5431
-      PG_USER: test
-      PG_PASS: test
-      PG_DATABASE: phonehome
-    ports:
-      - 8888:8888
+      - 8080:8080
+  # ui:
+  #   build: ui/
+  #   ports:
+  #     - 5050:80
+  # server:
+  #   build: server/
+  #   command: ["./wait-for-it.sh", "postgres:5431", "--", "phonehome"]
+  #   environment:
+  #     PG_HOST: localhost
+  #     PG_PORT: 5431
+  #     PG_USER: test
+  #     PG_PASS: test
+  #     PG_DATABASE: phonehome
+  #   ports:
+  #     - 8888:8888

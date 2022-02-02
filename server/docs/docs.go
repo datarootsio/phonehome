@@ -17,12 +17,67 @@ var doc = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "contact": {
+            "name": "phomehome.dev",
+            "url": "https://github.com/datarootsio/phonehome"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://github.com/datarootsio/phonehome/LICENSE"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {}
+    "paths": {
+        "/:organisation/:repository": {
+            "get": {
+                "description": "Fetch calls.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Fetch telemetry calls with filtering ability.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Call"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "main.Call": {
+            "type": "object",
+            "properties": {
+                "organisation": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "object"
+                },
+                "repository": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
+        }
+    }
 }`
 
 type swaggerInfo struct {
@@ -36,12 +91,12 @@ type swaggerInfo struct {
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
-	Version:     "",
-	Host:        "",
+	Version:     "1.0",
+	Host:        "api.phonehome.dev",
 	BasePath:    "",
 	Schemes:     []string{},
-	Title:       "",
-	Description: "",
+	Title:       "phonehome.dev",
+	Description: "KISS telemetry server for FOSS packages.",
 }
 
 type s struct{}

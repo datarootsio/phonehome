@@ -1,7 +1,66 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "KISS telemetry server for FOSS packages.",
+        "title": "phonehome.dev",
+        "contact": {
+            "name": "phomehome.dev",
+            "url": "https://github.com/datarootsio/phonehome"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://github.com/datarootsio/phonehome/LICENSE"
+        },
+        "version": "1.0"
     },
-    "paths": {}
+    "host": "api.phonehome.dev",
+    "paths": {
+        "/:organisation/:repository": {
+            "get": {
+                "description": "Fetch calls.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Fetch telemetry calls with filtering ability.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Call"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "main.Call": {
+            "type": "object",
+            "properties": {
+                "organisation": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "object"
+                },
+                "repository": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
+        }
+    }
 }

@@ -1,4 +1,43 @@
+definitions:
+  main.Call:
+    properties:
+      organisation:
+        type: string
+      payload:
+        type: object
+      repository:
+        type: string
+      timestamp:
+        type: string
+    type: object
+host: api.phonehome.dev
 info:
-  contact: {}
-paths: {}
+  contact:
+    name: phomehome.dev
+    url: https://github.com/datarootsio/phonehome
+  description: KISS telemetry server for FOSS packages.
+  license:
+    name: MIT
+    url: https://github.com/datarootsio/phonehome/LICENSE
+  title: phonehome.dev
+  version: "1.0"
+paths:
+  /:organisation/:repository:
+    get:
+      consumes:
+      - application/json
+      description: Fetch calls.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Call'
+            type: array
+      summary: Fetch telemetry calls with filtering ability.
+securityDefinitions:
+  BasicAuth:
+    type: basic
 swagger: "2.0"

@@ -1,4 +1,15 @@
 definitions:
+  main.BadgeInfo:
+    properties:
+      color:
+        type: string
+      label:
+        type: string
+      message:
+        type: string
+      schemaVersion:
+        type: integer
+    type: object
   main.Call:
     properties:
       organisation:
@@ -149,6 +160,30 @@ paths:
               $ref: '#/definitions/main.Call'
             type: array
       summary: Count telemetry calls.
+  /:organisation/:repository/count/badge:
+    get:
+      description: |-
+        Will give back a full count of telemetry calls.
+        Check out the documentation at [shields.io](https://shields.io/endpoint) for more details.
+      parameters:
+      - description: github organisation
+        in: path
+        name: organisation
+        required: true
+        type: string
+      - description: repository name
+        in: path
+        name: repository
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.BadgeInfo'
+      summary: shield.io badge information.
   /:organisation/:repository/count/daily:
     get:
       description: Count telemetry calls with optional filtering.

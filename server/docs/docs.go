@@ -166,6 +166,39 @@ var doc = `{
                 }
             }
         },
+        "/:organisation/:repository/count/badge": {
+            "get": {
+                "description": "Will give back a full count of telemetry calls.\nCheck out the documentation at [shields.io](https://shields.io/endpoint) for more details.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "shield.io badge information.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "github organisation",
+                        "name": "organisation",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "repository name",
+                        "name": "repository",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.BadgeInfo"
+                        }
+                    }
+                }
+            }
+        },
         "/:organisation/:repository/count/daily": {
             "get": {
                 "description": "Count telemetry calls with optional filtering.",
@@ -222,6 +255,23 @@ var doc = `{
         }
     },
     "definitions": {
+        "main.BadgeInfo": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "schemaVersion": {
+                    "type": "integer"
+                }
+            }
+        },
         "main.Call": {
             "type": "object",
             "properties": {

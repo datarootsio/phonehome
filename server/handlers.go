@@ -42,6 +42,14 @@ func getCountCallsByDate(fq FilterQuery) (DayCounts, error) {
 	return dc, nil
 }
 
+// @Summary      shield.io badge information.
+// @Description  Will give back a full count of telemetry calls.
+// @Description  Check out the documentation at [shields.io](https://shields.io/endpoint) for more details.
+// @Param        organisation  path   string  true   "github organisation"
+// @Param        repository    path   string  true   "repository name"
+// @Produce      json
+// @Success      200  {object}  BadgeInfo
+// @Router       /:organisation/:repository/count/badge [get]
 func getCountCallsBadgeHandler(c *gin.Context) {
 	var or OrgRepoURI
 	if err := c.ShouldBindUri(&or); err != nil {
@@ -234,7 +242,6 @@ func registerCallHander(c *gin.Context) {
 
 	resp.Status = "ok"
 	c.JSON(200, resp)
-
 }
 
 func registerCall(c Call) error {

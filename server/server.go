@@ -22,6 +22,7 @@ func buildServer() *gin.Engine {
 	r.GET("/:organisation/:repository", getCallsHandler)
 	r.GET("/:organisation/:repository/count", getCountCallsHandler)
 	r.GET("/:organisation/:repository/count/daily", getCountCallsByDayHandler)
+	r.GET("/:organisation/:repository/count/badge", getCountCallsBadgeHandler)
 
 	r.POST("/:organisation/:repository", registerCallHander)
 
@@ -29,6 +30,5 @@ func buildServer() *gin.Engine {
 
 	docsUrl := ginSwagger.URL("/docs/swagger.json")
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler, docsUrl))
-	r.GET("/:organisation/:repository/count/badge", getCountCallsBadgeHandler)
 	return r
 }

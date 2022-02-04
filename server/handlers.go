@@ -49,7 +49,7 @@ func getCountCallsByDate(fq FilterQuery) (DayCounts, error) {
 // @Param        repository    path   string  true   "repository name"
 // @Produce      json
 // @Success      200  {object}  BadgeInfo
-// @Router       /:organisation/:repository/count/badge [get]
+// @Router       /{organisation}/{repository}/count/badge [get]
 func getCountCallsBadgeHandler(c *gin.Context) {
 	var or OrgRepoURI
 	if err := c.ShouldBindUri(&or); err != nil {
@@ -80,7 +80,7 @@ func getCountCallsBadgeHandler(c *gin.Context) {
 // @Param        to_date       query  string  false  "to date to filter on"
 // @Produce      json
 // @Success      200  {array}  Call
-// @Router       /:organisation/:repository/count [get]
+// @Router       /{organisation}/{repository}/count [get]
 func getCountCallsHandler(c *gin.Context) {
 	var fq FilterQuery
 	var or OrgRepoURI
@@ -117,7 +117,7 @@ func getCountCallsHandler(c *gin.Context) {
 // @Param        to_date       query  string  false  "to date to filter on"
 // @Produce      json
 // @Success      200  {array}  Call
-// @Router       /:organisation/:repository/count/daily [get]
+// @Router       /{organisation}/{repository}/count/daily [get]
 func getCountCallsByDayHandler(c *gin.Context) {
 	var fq FilterQuery
 	var or OrgRepoURI
@@ -166,7 +166,7 @@ func getCalls(fq FilterQuery) ([]Call, error) {
 // @Param        to_date       query  string  false  "to date to filter on"
 // @Produce      json
 // @Success      200  {object}  CallsResp
-// @Router       /:organisation/:repository [get]
+// @Router       /{organisation}/{repository} [get]
 func getCallsHandler(c *gin.Context) {
 	var fq FilterQuery
 	var or OrgRepoURI
@@ -204,8 +204,9 @@ func getCallsHandler(c *gin.Context) {
 // @Param        repository    path   string  true   "repository name"
 // @Produce      json
 // @Success      200  {object}  RegisterResp
-// @Router       /:organisation/:repository [post]
+// @Router       /{organisation}/{repository} [post]
 func registerCallHander(c *gin.Context) {
+	var or OrgRepoURI
 	var call Call
 	var pl CallPayload
 	var resp RegisterResp
@@ -233,6 +234,15 @@ func registerCallHander(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
+
+	if err := c.ShouldBindUri(&or); err != nil {
+		resp.Error = err.Error()
+		c.JSON(http.StatusBadRequest, resp)
+		return
+	}
+
+	call.Organisation = or.Organisation
+	call.Repository = or.Repository
 
 	if err := registerCall(call); err != nil {
 		resp.Error = err.Error()

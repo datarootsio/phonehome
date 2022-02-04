@@ -30,7 +30,7 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/:organisation/:repository": {
+        "/{organisation}/{repository}": {
             "get": {
                 "description": "Fetch telemetry calls with optional filtering.",
                 "produces": [
@@ -112,7 +112,7 @@ var doc = `{
                 }
             }
         },
-        "/:organisation/:repository/count": {
+        "/{organisation}/{repository}/count": {
             "get": {
                 "description": "Count telemetry calls with optional filtering.",
                 "produces": [
@@ -166,7 +166,7 @@ var doc = `{
                 }
             }
         },
-        "/:organisation/:repository/count/badge": {
+        "/{organisation}/{repository}/count/badge": {
             "get": {
                 "description": "Will give back a full count of telemetry calls.\nCheck out the documentation at [shields.io](https://shields.io/endpoint) for more details.",
                 "produces": [
@@ -199,7 +199,7 @@ var doc = `{
                 }
             }
         },
-        "/:organisation/:repository/count/daily": {
+        "/{organisation}/{repository}/count/daily": {
             "get": {
                 "description": "Count telemetry calls with optional filtering.",
                 "produces": [

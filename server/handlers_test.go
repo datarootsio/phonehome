@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -98,4 +101,61 @@ func TestCountCalls(t *testing.T) {
 		assert.Equal(t, test.expectedLen, cc)
 		assert.Equal(t, test.expectErr, err != nil)
 	}
+}
+
+func TestGetOrgRepoHTTP(t *testing.T) {
+	router := buildServer()
+
+	testKey := uuid.NewV4().String()
+	testVal := uuid.NewV4().String()
+	testKey2 := uuid.NewV4().String()
+	testVal2 := uuid.NewV4().String()
+	testOrg := uuid.NewV4().String()
+	testRepo := uuid.NewV4().String()
+
+	// create new call
+	m, b := map[string]interface{}{testKey: testVal, testKey2: testVal2}, new(bytes.Buffer)
+	json.NewEncoder(b).Encode(m)
+	req, _ := http.NewRequest("POST", fmt.Sprintf("/%s/%s", testOrg, testRepo), b)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Result().StatusCode)
+	assert.Contains(t, w.Body.String(), "ok")
+
+	// check if we can count that testKey
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/%s/%s/count", testOrg, testRepo), b)
+	q := req.URL.Query()
+	q.Add("key", testKey)
+	req.URL.RawQuery = q.Encode()
+
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Result().StatusCode)
+	var cs CountResp
+	json.NewDecoder(w.Body).Decode(&cs)
+
+	assert.Equal(t, w.Result().StatusCode, 200)
+	assert.EqualValues(t, 1, cs.Data) // should count on registered call
+
+	// check if we can get back that call
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/%s/%s", testOrg, testRepo), b)
+	q = req.URL.Query()
+	q.Add("key", testKey)
+	req.URL.RawQuery = q.Encode()
+
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Result().StatusCode)
+	var cr CallsResp
+	json.NewDecoder(w.Body).Decode(&cr)
+
+	assert.Equal(t, w.Result().StatusCode, 200)
+	assert.True(t, len(cr.Data) > 0)
+	assert.Equal(t, cr.Data[0].Organisation, testOrg)
+
+	assert.Contains(t, string(cr.Data[0].Payload.RawMessage), testKey)
+
 }

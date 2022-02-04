@@ -66,7 +66,7 @@ info:
   title: phonehome.dev
   version: "1.0"
 paths:
-  /:organisation/:repository:
+  /{organisation}/{repository}:
     get:
       description: Fetch telemetry calls with optional filtering.
       parameters:
@@ -124,7 +124,7 @@ paths:
           schema:
             $ref: '#/definitions/main.RegisterResp'
       summary: Register new telemetry call.
-  /:organisation/:repository/count:
+  /{organisation}/{repository}/count:
     get:
       description: Count telemetry calls with optional filtering.
       parameters:
@@ -160,7 +160,7 @@ paths:
               $ref: '#/definitions/main.Call'
             type: array
       summary: Count telemetry calls.
-  /:organisation/:repository/count/badge:
+  /{organisation}/{repository}/count/badge:
     get:
       description: |-
         Will give back a full count of telemetry calls.
@@ -184,7 +184,7 @@ paths:
           schema:
             $ref: '#/definitions/main.BadgeInfo'
       summary: shield.io badge information.
-  /:organisation/:repository/count/daily:
+  /{organisation}/{repository}/count/daily:
     get:
       description: Count telemetry calls with optional filtering.
       parameters:

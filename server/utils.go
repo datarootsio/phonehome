@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
@@ -68,6 +69,8 @@ func InitConfig() {
 	viper.MergeConfigMap(sec.AllSettings())
 
 	viper.SetDefault("PORT", 8888)
+
+	checkRepoExistence = viper.GetBool("CHECK_REPO_EXISTENCE")
 }
 
 func autoMigrate() error {
@@ -100,4 +103,14 @@ func callsQueryBuilder(fq FilterQuery) (*gorm.DB, error) {
 	}
 
 	return gq, nil
+}
+
+func githubRepoExists(user string, repo string) bool {
+	resp, err := http.Get(fmt.Sprintf("https://api.github.com/repos/%s/%s", user, repo))
+	if err != nil {
+		return false
+	}
+
+	return resp.StatusCode == 200
+
 }

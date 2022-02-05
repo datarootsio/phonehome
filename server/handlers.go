@@ -268,3 +268,20 @@ func registerCall(c Call) error {
 	result := db.Create(&c)
 	return result.Error
 }
+
+func githubRepoExistsMW(c *gin.Context) {
+	or := OrgRepoURI{}
+	if err := c.ShouldBindUri(or); err != nil {
+		// assume we're on a route that doesnt need
+		// repo specification
+		return
+	}
+
+	if !githubRepoExists(or.Organisation, or.Repository) {
+		resp := DefaultResp{
+			Error: fmt.Sprintf("github repository existence could not be verified (%s/%s)",
+				or.Organisation, or.Repository)}
+		c.JSON(http.StatusBadRequest, resp)
+		return
+	}
+}

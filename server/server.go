@@ -9,11 +9,16 @@ import (
 )
 
 var db *gorm.DB
+var checkRepoExistence bool
 
 const getCallsLimit = 3000
 
 func buildServer() *gin.Engine {
 	r := gin.Default()
+
+	if checkRepoExistence {
+		r.Use(githubRepoExistsMW)
+	}
 
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:8080", "https://phonehome.dev"}

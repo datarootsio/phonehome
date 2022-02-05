@@ -54,10 +54,16 @@ jobs:
         with:
           go-version: 1.17
       - run: apt-get update && apt-get install -y ca-certificates
-      - run: go test ./...
+      - run: go test ./... -coverprofile=coverage.out
         working-directory: ./server
         env:
           CGO_ENABLED: 0
+      - run: go tool cover -o coverage.html -html=coverage.out
+        working-directory: ./server
+      - uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report
+          path: ./server/coverage.html
 
   build-static-site:
     needs: tests
@@ -78,6 +84,11 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v0
       - run: gsutil -m copy -r ./public/* gs://phonehome-website
         working-directory: ./ui
+      # cov report
+      - uses: actions/download-artifact@v2
+        with:
+          name: coverage-report
+      - run: gsutil copy coverage.html gs://phonehome-website
 
 
   deploy-docker:

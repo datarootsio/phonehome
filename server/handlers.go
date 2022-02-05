@@ -99,7 +99,7 @@ func getCountCallsHandler(c *gin.Context) {
 
 	fq.Organisation = or.Organisation
 	fq.Repository = or.Repository
-	resp.Query = fq
+	resp.Query = &fq
 
 	count, err := getCountCalls(fq)
 	if err != nil {
@@ -136,7 +136,7 @@ func getCountCallsByDayHandler(c *gin.Context) {
 
 	fq.Organisation = or.Organisation
 	fq.Repository = or.Repository
-	resp.Query = fq
+	resp.Query = &fq
 
 	dc, err := getCountCallsByDate(fq)
 	if err != nil {
@@ -186,7 +186,7 @@ func getCallsHandler(c *gin.Context) {
 	fq.Organisation = or.Organisation
 	fq.Repository = or.Repository
 
-	resp.Query = fq
+	resp.Query = &fq
 
 	cs, err := getCalls(fq)
 	if err != nil {
@@ -254,7 +254,7 @@ func registerCallHander(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
-
+	resp.Payload = call.Payload.RawMessage
 	c.JSON(200, resp)
 }
 
@@ -270,19 +270,20 @@ func registerCall(c Call) error {
 }
 
 func githubRepoExistsMW(c *gin.Context) {
-	or := OrgRepoURI{}
-	if err := c.ShouldBindUri(or); err != nil {
-		// assume we're on a route that doesnt need
-		// repo specification
+	if !checkRepoExistence {
+		c.Next()
 		return
 	}
 
-	if !githubRepoExists(or.Organisation, or.Repository) {
+	org := c.Param("organisation")
+	repo := c.Param("repository")
+
+	if !githubRepoExists(org, repo) {
 		resp := DefaultResp{
-			Error: fmt.Sprintf("github repository existence could not be verified (%s/%s)",
-				or.Organisation, or.Repository),
+			Error: fmt.Sprintf("github repository doesn't seem to exist: %s/%s",
+				org, repo),
 		}
-		c.JSON(http.StatusBadRequest, resp)
-		return
+		c.AbortWithStatusJSON(http.StatusBadRequest, resp)
 	}
+	c.Next()
 }

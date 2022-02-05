@@ -18,10 +18,6 @@ const getCallsLimit = 3000
 func buildServer() *gin.Engine {
 	r := gin.Default()
 
-	if checkRepoExistence {
-		r.Use(githubRepoExistsMW)
-	}
-
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:8080", "https://phonehome.dev"}
 	r.Use(cors.New(config))
@@ -31,8 +27,8 @@ func buildServer() *gin.Engine {
 	r.GET("/:organisation/:repository/count", getCountCallsHandler)
 	r.GET("/:organisation/:repository", getCallsHandler)
 
-	r.POST("/:organisation/:repository", registerCallHander)
-	r.POST("/:organisation/:repository/", registerCallHander)
+	r.POST("/:organisation/:repository", githubRepoExistsMW, registerCallHander)
+	r.POST("/:organisation/:repository/", githubRepoExistsMW, registerCallHander)
 
 	r.StaticFile("/docs/swagger.json", "./docs/swagger.json")
 

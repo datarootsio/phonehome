@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"strconv"
 	"strings"
 	"time"
@@ -19,7 +20,7 @@ type BadgeInfo struct {
 
 func (bi BadgeInfo) Create(count int64) BadgeInfo {
 	bi.SchemaVersion = 1
-	bi.Label = "pings"
+	bi.Label = "telemetry"
 	bi.Message = strconv.FormatInt(count, 10)
 	bi.Color = "brightgreen"
 
@@ -27,8 +28,8 @@ func (bi BadgeInfo) Create(count int64) BadgeInfo {
 }
 
 type DefaultResp struct {
-	Error string      `json:"error,omitempty"`
-	Query FilterQuery `json:"query,omitempty"`
+	Error string       `json:"error,omitempty"`
+	Query *FilterQuery `json:"query,omitempty"`
 }
 
 type CallsResp struct {
@@ -47,7 +48,9 @@ type DailyCountResp struct {
 }
 
 type RegisterResp struct {
-	Error string `json:"error,omitempty"`
+	DefaultResp
+	Payload json.RawMessage `json:"payload"`
+	Error   string          `json:"error,omitempty"`
 }
 
 type Call struct {

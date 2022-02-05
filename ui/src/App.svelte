@@ -1,6 +1,7 @@
 <script>
   import Chart from "svelte-frappe-charts";
 
+  let statsHidden = true;
   let cdata = {
     labels: ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"],
     datasets: [
@@ -10,7 +11,7 @@
     ],
   };
 
-  let orgRepo = "testorg/testrepo";
+  let orgRepo = "datarootsio/cheek";
   let serverURL = (process).env.serverURL;
 
   const goButton = () => {
@@ -20,7 +21,7 @@
       .then((response) => response.json())
       .then((data) => console.log(data));
 
-    fetch(`${serverURL}/${org}/${repo}/count?group_by=day`)
+    fetch(`${serverURL}/${org}/${repo}/count/daily`)
       .then((response) => response.json())
       .then((data) => {
         console.log(22, data);
@@ -34,6 +35,8 @@
             values: counts,
           },
         ];
+
+        statsHidden = false;
       });
   };
 
@@ -91,7 +94,7 @@
         </div>
       </div>
 
-      <div class="pt-12">
+      <div class={`pt-12 ${statsHidden ? "hidden" : "visible"}`}>
         <img alt="total-count" src={usageBadgeSrc()} />
         <Chart data={cdata} type="line" />
       </div>

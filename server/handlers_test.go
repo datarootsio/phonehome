@@ -9,8 +9,8 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
@@ -93,20 +93,32 @@ func TestCountCalls(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	d1 := JsonDate(time.Now().AddDate(0, 0, 1))
+	d2 := JsonDate(time.Now().AddDate(0, 0, -2))
+
 	tests := []test{
 		{fq: FilterQuery{Key: testKey, Organisation: testOrg, Repository: testRepo}, expectErr: false, expectedLen: 2},
 		{fq: FilterQuery{Key: testKey2, Organisation: testOrg, Repository: testRepo}, expectErr: false, expectedLen: 0},
-		// {fq: FilterQuery{Key: testKey2, Organisation: testOrg, Repository: testRepo,
-		// 	FromDate: time.Now().AddDate(0, 0, 1).Format(YYYYMMDDLayout)},
-		// 	expectErr: false, expectedLen: 0},
-		// {fq: FilterQuery{Key: testKey2, Organisation: testOrg, Repository: testRepo,
-		// 	FromDate: time.Now().AddDate(0, 0, -2).Format(YYYYMMDDLayout)},
-		// 	expectErr: false, expectedLen: 2},
+		{fq: FilterQuery{Key: testKey,
+			Organisation: testOrg, Repository: testRepo,
+			FromDate: &d1},
+			expectErr: false, expectedLen: 0},
+		{fq: FilterQuery{Key: testKey,
+			Organisation: testOrg, Repository: testRepo,
+			FromDate: &d2},
+			expectErr: false, expectedLen: 2},
+		{fq: FilterQuery{Key: testKey,
+			Organisation: testOrg, Repository: testRepo,
+			FromDate: &d2},
+			expectErr: false, expectedLen: 2},
+		{fq: FilterQuery{Key: testKey,
+			Organisation: testOrg, Repository: testRepo,
+			FromDate: &d2, ToDate: &d1},
+			expectErr: false, expectedLen: 2},
 	}
 
 	for _, test := range tests {
 		cc, err := getCountCalls(test.fq)
-		spew.Dump(test.fq)
 		assert.Equal(t, test.expectedLen, cc)
 		assert.Equal(t, test.expectErr, err != nil)
 	}

@@ -91,12 +91,12 @@ func callsQueryBuilder(fq FilterQuery) (*gorm.DB, error) {
 		gq = gq.Where(datatypes.JSONQuery("payload").HasKey(fq.Key))
 	}
 
-	if fq.FromDate != "" {
-		gq = gq.Where("timestamp::date >= ?", fq.FromDate)
+	if fq.FromDate != nil {
+		gq = gq.Where("timestamp >= ?", fq.FromDate)
 	}
 
-	if fq.ToDate != "" {
-		gq = gq.Where("timestamp::date < ?", fq.ToDate)
+	if fq.ToDate != nil {
+		gq = gq.Where("timestamp < ?", fq.ToDate)
 	}
 
 	return gq, nil

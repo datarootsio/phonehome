@@ -18,8 +18,6 @@ definitions:
         type: object
       repository:
         type: string
-      timestamp:
-        type: string
     type: object
   main.CallsResp:
     properties:
@@ -50,8 +48,6 @@ definitions:
   main.RegisterResp:
     properties:
       error:
-        type: string
-      status:
         type: string
     type: object
 host: api.phonehome.dev
@@ -101,6 +97,8 @@ paths:
             $ref: '#/definitions/main.CallsResp'
       summary: Fetch telemetry calls.
     post:
+      consumes:
+      - application/json
       description: |-
         Register new call.
 
@@ -109,6 +107,11 @@ paths:
       - description: github organisation
         in: path
         name: organisation
+        required: true
+        type: string
+      - description: repository name
+        in: path
+        name: repository
         required: true
         type: string
       - description: repository name

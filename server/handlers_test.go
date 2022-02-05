@@ -7,8 +7,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/jinzhu/gorm/dialects/postgres"
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
@@ -94,10 +96,17 @@ func TestCountCalls(t *testing.T) {
 	tests := []test{
 		{fq: FilterQuery{Key: testKey, Organisation: testOrg, Repository: testRepo}, expectErr: false, expectedLen: 2},
 		{fq: FilterQuery{Key: testKey2, Organisation: testOrg, Repository: testRepo}, expectErr: false, expectedLen: 0},
+		// {fq: FilterQuery{Key: testKey2, Organisation: testOrg, Repository: testRepo,
+		// 	FromDate: time.Now().AddDate(0, 0, 1).Format(YYYYMMDDLayout)},
+		// 	expectErr: false, expectedLen: 0},
+		// {fq: FilterQuery{Key: testKey2, Organisation: testOrg, Repository: testRepo,
+		// 	FromDate: time.Now().AddDate(0, 0, -2).Format(YYYYMMDDLayout)},
+		// 	expectErr: false, expectedLen: 2},
 	}
 
 	for _, test := range tests {
 		cc, err := getCountCalls(test.fq)
+		spew.Dump(test.fq)
 		assert.Equal(t, test.expectedLen, cc)
 		assert.Equal(t, test.expectErr, err != nil)
 	}
@@ -121,7 +130,6 @@ func TestGetOrgRepoHTTP(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Result().StatusCode)
-	assert.Contains(t, w.Body.String(), "ok")
 
 	// check if we can count that testKey
 	req, _ = http.NewRequest("GET", fmt.Sprintf("/%s/%s/count", testOrg, testRepo), b)
@@ -158,4 +166,43 @@ func TestGetOrgRepoHTTP(t *testing.T) {
 
 	assert.Contains(t, string(cr.Data[0].Payload.RawMessage), testKey)
 
+	// check if get count calls by date works
+
+	// create second call to same org/repo
+	m, b = map[string]interface{}{testKey: testVal, testKey2: testVal2}, new(bytes.Buffer)
+	json.NewEncoder(b).Encode(m)
+	req, _ = http.NewRequest("POST", fmt.Sprintf("/%s/%s", testOrg, testRepo), b)
+
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Result().StatusCode)
+
+	// let fetch the counts per day
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/%s/%s/count/daily", testOrg, testRepo), nil)
+
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	var dcr DailyCountResp
+	json.NewDecoder(w.Body).Decode(&dcr)
+	assert.Equal(t, 200, w.Result().StatusCode)
+	assert.True(t, len(dcr.Data) > 0)
+	assert.Equal(t, 1, len(dcr.Data))
+	assert.EqualValues(t, 2, dcr.Data[0].Count)
+
+	// finally lets get a total count for our badge
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/%s/%s/count/badge", testOrg, testRepo), nil)
+
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	var bdg BadgeInfo
+	json.NewDecoder(w.Body).Decode(&bdg)
+	assert.Equal(t, 200, w.Result().StatusCode)
+	bc, err := strconv.Atoi(bdg.Message)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Greater(t, bc, 0)
+	assert.True(t, bdg.Label != "")
 }

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 	"gorm.io/datatypes"
@@ -18,8 +17,6 @@ func InitDBConn() error {
 	var dsn string
 
 	if viper.GetString("PG_SOCKET_DIR") == "" {
-		spew.Dump(viper.AllSettings())
-
 		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Europe/Brussels",
 			viper.GetString("PG_HOST"),
 			viper.GetString("PG_USER"),
@@ -95,11 +92,11 @@ func callsQueryBuilder(fq FilterQuery) (*gorm.DB, error) {
 	}
 
 	if fq.FromDate != "" {
-		gq = gq.Where("from_date >= ?", fq.FromDate)
+		gq = gq.Where("timestamp::date >= ?", fq.FromDate)
 	}
 
 	if fq.ToDate != "" {
-		gq = gq.Where("to_date < ?", fq.ToDate)
+		gq = gq.Where("timestamp::date < ?", fq.ToDate)
 	}
 
 	return gq, nil

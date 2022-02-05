@@ -1,12 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"strconv"
 	"time"
 
 	pgd "github.com/jinzhu/gorm/dialects/postgres"
 )
+
+const YYYYMMDDLayout = "2006-01-02"
 
 type BadgeInfo struct {
 	SchemaVersion int64
@@ -15,7 +16,7 @@ type BadgeInfo struct {
 	Color         string
 }
 
-func (bi BadgeInfo) Get(count int64) BadgeInfo {
+func (bi BadgeInfo) Create(count int64) BadgeInfo {
 	bi.SchemaVersion = 1
 	bi.Label = "pings"
 	bi.Message = strconv.FormatInt(count, 10)
@@ -28,7 +29,6 @@ type DefaultResp struct {
 	Error string      `json:"error,omitempty"`
 	Query FilterQuery `json:"query,omitempty"`
 }
-
 type CallsResp struct {
 	DefaultResp
 	Data []Call `json:"data"`
@@ -45,13 +45,12 @@ type DailyCountResp struct {
 }
 
 type RegisterResp struct {
-	Error  string `json:"error,omitempty"`
-	Status string `json:"status"`
+	Error string `json:"error,omitempty"`
 }
 
 type Call struct {
-	ID           uint `gorm:"primaryKey" json:"-"`
-	Timestamp    time.Time
+	ID           uint      `gorm:"primaryKey" json:"-"`
+	Timestamp    time.Time `json:"timestamp" swaggerignore:"true"`
 	Payload      pgd.Jsonb `gorm:"type:jsonb" json:"payload" swaggertype:"object"`
 	Organisation string    `gorm:"not null" json:"organisation"`
 	Repository   string    `gorm:"not null" json:"repository"`
@@ -60,27 +59,8 @@ type Call struct {
 type CallPayload map[string]interface{}
 
 type DayCounts []struct {
-	Date  time.Time `json:"date,omitempty"`
-	Count int64     `json:"count,omitempty"`
-}
-
-func (dc DayCounts) MarshalJSON() ([]byte, error) {
-	type dcr struct {
-		Date  string `json:"date"`
-		Count int64  `json:"count"`
-	}
-
-	dcrs := []dcr{}
-
-	const layout = "2006-01-02"
-	for _, e := range dc {
-		dcrs = append(dcrs, dcr{
-			Date:  e.Date.Format(layout),
-			Count: e.Count,
-		})
-	}
-
-	return json.Marshal(&dcrs)
+	Date  string `json:"date,omitempty"`
+	Count int64  `json:"count,omitempty"`
 }
 
 type OrgRepoURI struct {

@@ -19,12 +19,13 @@ func buildServer() *gin.Engine {
 	config.AllowOrigins = []string{"http://localhost:8080", "https://phonehome.dev"}
 	r.Use(cors.New(config))
 
-	r.GET("/:organisation/:repository", getCallsHandler)
-	r.GET("/:organisation/:repository/count", getCountCallsHandler)
 	r.GET("/:organisation/:repository/count/daily", getCountCallsByDayHandler)
 	r.GET("/:organisation/:repository/count/badge", getCountCallsBadgeHandler)
+	r.GET("/:organisation/:repository/count", getCountCallsHandler)
+	r.GET("/:organisation/:repository", getCallsHandler)
 
 	r.POST("/:organisation/:repository", registerCallHander)
+	r.POST("/:organisation/:repository/", registerCallHander)
 
 	r.StaticFile("/docs/swagger.json", "./docs/swagger.json")
 

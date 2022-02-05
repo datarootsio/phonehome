@@ -82,6 +82,9 @@ var doc = `{
             },
             "post": {
                 "description": "Register new call.\n\nRequires a JSON body in the shape of ` + "`" + `{\"foo\": \"bar\", \"coffee\": \"beans\"}` + "`" + `.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -91,6 +94,13 @@ var doc = `{
                         "type": "string",
                         "description": "github organisation",
                         "name": "organisation",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "repository name",
+                        "name": "repository",
                         "in": "path",
                         "required": true
                     },
@@ -283,9 +293,6 @@ var doc = `{
                 },
                 "repository": {
                     "type": "string"
-                },
-                "timestamp": {
-                    "type": "string"
                 }
             }
         },
@@ -333,9 +340,6 @@ var doc = `{
             "type": "object",
             "properties": {
                 "error": {
-                    "type": "string"
-                },
-                "status": {
                     "type": "string"
                 }
             }

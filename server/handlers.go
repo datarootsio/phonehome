@@ -15,7 +15,7 @@ func getCountCalls(fq FilterQuery) (int64, error) {
 
 	gq, err := callsQueryBuilder(fq)
 	if err != nil {
-		return count, nil
+		return count, err
 	}
 
 	result := gq.Model(&Call{}).Count(&count)
@@ -29,12 +29,15 @@ func getCountCalls(fq FilterQuery) (int64, error) {
 func getCountCallsByDate(fq FilterQuery) (DayCounts, error) {
 	dc := DayCounts{}
 
-	res := db.Raw(`
-	select timestamp::date as date, count(*) 
-	from calls
-	group by timestamp::date
-	order by timestamp::date ASC
-	`).Scan(&dc)
+	gq, err := callsQueryBuilder(fq)
+	if err != nil {
+		return dc, err
+	}
+
+	res := gq.Model(&Call{}).
+		Group("timestamp::date").
+		Select("timestamp::date as date, count(*) as count").
+		Find(&dc)
 	if res.Error != nil {
 		return dc, res.Error
 	}
@@ -55,7 +58,6 @@ func getCountCallsBadgeHandler(c *gin.Context) {
 	if err := c.ShouldBindUri(&or); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
-
 	}
 
 	fq := FilterQuery{}
@@ -63,10 +65,11 @@ func getCountCallsBadgeHandler(c *gin.Context) {
 
 	count, err := getCountCalls(fq)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		resp := DefaultResp{Error: err.Error()}
+		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
-	bi := BadgeInfo{}.Get(count)
+	bi := BadgeInfo{}.Create(count)
 
 	c.JSON(200, bi)
 }
@@ -200,7 +203,9 @@ func getCallsHandler(c *gin.Context) {
 // @Description  Register new call.
 // @Description
 // @Description  Requires a JSON body in the shape of `{"foo": "bar", "coffee": "beans"}`.
+// @Accept json
 // @Param        organisation  path   string  true   "github organisation"
+// @Param        repository    path   string  true   "repository name"
 // @Param        repository    path   string  true   "repository name"
 // @Produce      json
 // @Success      200  {object}  RegisterResp
@@ -250,7 +255,6 @@ func registerCallHander(c *gin.Context) {
 		return
 	}
 
-	resp.Status = "ok"
 	c.JSON(200, resp)
 }
 

@@ -81,6 +81,11 @@ resource "google_cloud_run_service" "cloudrun_server" {
         }
 
         env {
+          name  = "CHECK_REPO_EXISTENCE"
+          value = "true"
+        }
+
+        env {
           name  = "PG_INSTANCE_CONNECTION_NAME"
           value = google_sql_database_instance.instance.connection_name
         }

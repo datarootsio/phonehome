@@ -99,22 +99,38 @@ func TestCountCalls(t *testing.T) {
 	tests := []test{
 		{fq: FilterQuery{Key: testKey, Organisation: testOrg, Repository: testRepo}, expectErr: false, expectedLen: 2},
 		{fq: FilterQuery{Key: testKey2, Organisation: testOrg, Repository: testRepo}, expectErr: false, expectedLen: 0},
-		{fq: FilterQuery{Key: testKey,
-			Organisation: testOrg, Repository: testRepo,
-			FromDate: &d1},
-			expectErr: false, expectedLen: 0},
-		{fq: FilterQuery{Key: testKey,
-			Organisation: testOrg, Repository: testRepo,
-			FromDate: &d2},
-			expectErr: false, expectedLen: 2},
-		{fq: FilterQuery{Key: testKey,
-			Organisation: testOrg, Repository: testRepo,
-			FromDate: &d2},
-			expectErr: false, expectedLen: 2},
-		{fq: FilterQuery{Key: testKey,
-			Organisation: testOrg, Repository: testRepo,
-			FromDate: &d2, ToDate: &d1},
-			expectErr: false, expectedLen: 2},
+		{
+			fq: FilterQuery{
+				Key:          testKey,
+				Organisation: testOrg, Repository: testRepo,
+				FromDate: &d1,
+			},
+			expectErr: false, expectedLen: 0,
+		},
+		{
+			fq: FilterQuery{
+				Key:          testKey,
+				Organisation: testOrg, Repository: testRepo,
+				FromDate: &d2,
+			},
+			expectErr: false, expectedLen: 2,
+		},
+		{
+			fq: FilterQuery{
+				Key:          testKey,
+				Organisation: testOrg, Repository: testRepo,
+				FromDate: &d2,
+			},
+			expectErr: false, expectedLen: 2,
+		},
+		{
+			fq: FilterQuery{
+				Key:          testKey,
+				Organisation: testOrg, Repository: testRepo,
+				FromDate: &d2, ToDate: &d1,
+			},
+			expectErr: false, expectedLen: 2,
+		},
 	}
 
 	for _, test := range tests {

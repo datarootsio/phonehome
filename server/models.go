@@ -30,6 +30,7 @@ type DefaultResp struct {
 	Error string      `json:"error,omitempty"`
 	Query FilterQuery `json:"query,omitempty"`
 }
+
 type CallsResp struct {
 	DefaultResp
 	Data []Call `json:"data"`
@@ -69,15 +70,17 @@ type OrgRepoURI struct {
 	Repository   string `uri:"repository" binding:"required"`
 }
 
-type JsonDate time.Time
-type FilterQuery struct {
-	GroupBy      string    `form:"group_by" json:"group_by,omitempty"`
-	Key          string    `form:"key" json:"key,omitempty"`
-	FromDate     *JsonDate `json:"from_date,omitempty"`
-	ToDate       *JsonDate `json:"to_date,omitempty"`
-	Organisation string    `json:"organisation,omitempty"`
-	Repository   string    `json:"repository,omitempty"`
-}
+type (
+	JsonDate    time.Time
+	FilterQuery struct {
+		GroupBy      string    `form:"group_by" json:"group_by,omitempty"`
+		Key          string    `form:"key" json:"key,omitempty"`
+		FromDate     *JsonDate `json:"from_date,omitempty"`
+		ToDate       *JsonDate `json:"to_date,omitempty"`
+		Organisation string    `json:"organisation,omitempty"`
+		Repository   string    `json:"repository,omitempty"`
+	}
+)
 
 func (jd *JsonDate) UnmarshalJSON(b []byte) error {
 	s := strings.Trim(string(b), "\"")

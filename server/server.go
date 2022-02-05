@@ -8,8 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-var checkRepoExistence bool
+var (
+	db                 *gorm.DB
+	checkRepoExistence bool
+)
 
 const getCallsLimit = 3000
 

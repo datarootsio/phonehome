@@ -280,7 +280,8 @@ func githubRepoExistsMW(c *gin.Context) {
 	if !githubRepoExists(or.Organisation, or.Repository) {
 		resp := DefaultResp{
 			Error: fmt.Sprintf("github repository existence could not be verified (%s/%s)",
-				or.Organisation, or.Repository)}
+				or.Organisation, or.Repository),
+		}
 		c.JSON(http.StatusBadRequest, resp)
 		return
 	}

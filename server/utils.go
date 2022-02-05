@@ -112,5 +112,4 @@ func githubRepoExists(user string, repo string) bool {
 	}
 
 	return resp.StatusCode == 200
-
 }

@@ -51,6 +51,7 @@ type RegisterResp struct {
 	DefaultResp
 	Payload json.RawMessage `json:"payload"`
 	Error   string          `json:"error,omitempty"`
+	Message string          `json:"message,omitempty"`
 }
 
 type Call struct {

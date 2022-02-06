@@ -113,3 +113,22 @@ func githubRepoExists(user string, repo string) bool {
 
 	return resp.StatusCode == 200
 }
+
+func payloadStripper(pl CallPayload) (CallPayload, bool) {
+	var stripped bool
+	for k, v := range pl {
+		switch v.(type) {
+		case string:
+			break
+		case int:
+			break
+		case float64:
+			break
+		default:
+			delete(pl, k)
+			stripped = true
+		}
+	}
+
+	return pl, stripped
+}

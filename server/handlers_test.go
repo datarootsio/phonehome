@@ -35,10 +35,12 @@ func TestRegisterCall(t *testing.T) {
 	tests := []test{
 		{input: Call{Payload: postgres.Jsonb{RawMessage: json.RawMessage(`{"blaat": 0}`)}, Organisation: "testorg", Repository: "testrepo"}, expectErr: false},
 		{input: Call{Payload: postgres.Jsonb{RawMessage: json.RawMessage(`invalid`)}, Organisation: "testorg", Repository: "testrepo"}, expectErr: true},
+		{input: Call{Payload: postgres.Jsonb{RawMessage: json.RawMessage(``)}, Organisation: "testorg", Repository: "testrepo"}, expectErr: false},
 	}
 
 	for _, test := range tests {
-		err := registerCall(test.input)
+		_, _, err := registerCall(test.input)
+		t.Log(err)
 		assert.Equal(t, err != nil, test.expectErr)
 	}
 }
@@ -54,7 +56,7 @@ func TestGetCalls(t *testing.T) {
 	testOrg := uuid.NewV1().String()
 	testRepo := uuid.NewV1().String()
 
-	err := registerCall(Call{Organisation: testOrg, Repository: testRepo, Payload: postgres.Jsonb{RawMessage: json.RawMessage(fmt.Sprintf(`{"%s": "am_sheep"}`, testKey))}})
+	_, _, err := registerCall(Call{Organisation: testOrg, Repository: testRepo, Payload: postgres.Jsonb{RawMessage: json.RawMessage(fmt.Sprintf(`{"%s": "am_sheep"}`, testKey))}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,11 +86,11 @@ func TestCountCalls(t *testing.T) {
 	testRepo := uuid.NewV1().String()
 
 	// run this twice to know what to expect
-	err := registerCall(Call{Organisation: testOrg, Repository: testRepo, Payload: postgres.Jsonb{RawMessage: json.RawMessage(fmt.Sprintf(`{"%s": "am_sheep"}`, testKey))}})
+	_, _, err := registerCall(Call{Organisation: testOrg, Repository: testRepo, Payload: postgres.Jsonb{RawMessage: json.RawMessage(fmt.Sprintf(`{"%s": "am_sheep"}`, testKey))}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = registerCall(Call{Organisation: testOrg, Repository: testRepo, Payload: postgres.Jsonb{RawMessage: json.RawMessage(fmt.Sprintf(`{"%s": "am_sheep"}`, testKey))}})
+	_, _, err = registerCall(Call{Organisation: testOrg, Repository: testRepo, Payload: postgres.Jsonb{RawMessage: json.RawMessage(fmt.Sprintf(`{"%s": "am_sheep"}`, testKey))}})
 	if err != nil {
 		t.Fatal(err)
 	}

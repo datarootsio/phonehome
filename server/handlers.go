@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -213,32 +214,12 @@ func getCallsHandler(c *gin.Context) {
 func registerCallHander(c *gin.Context) {
 	var or OrgRepoURI
 	var call Call
-	var pl CallPayload
 	var resp RegisterResp
 
-	// unmarshal and remarshal to strip away nested objects
+	// read json payload in body
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(c.Request.Body)
-	if err := json.Unmarshal(buf.Bytes(), &pl); err != nil {
-		resp.Error = err.Error()
-		c.JSON(http.StatusBadRequest, resp)
-		return
-	}
-
-	plClean, err := json.Marshal(pl)
-	if err != nil {
-		resp.Error = err.Error()
-		c.JSON(http.StatusBadRequest, resp)
-		return
-	}
-
-	call.Payload.RawMessage = json.RawMessage(plClean)
-
-	if err := c.ShouldBind(&call); err != nil {
-		resp.Error = err.Error()
-		c.JSON(http.StatusBadRequest, resp)
-		return
-	}
+	call.Payload.RawMessage = json.RawMessage(buf.Bytes())
 
 	if err := c.ShouldBindUri(&or); err != nil {
 		resp.Error = err.Error()
@@ -249,24 +230,56 @@ func registerCallHander(c *gin.Context) {
 	call.Organisation = or.Organisation
 	call.Repository = or.Repository
 
-	if err := registerCall(call); err != nil {
+	cpl, stripped, err := registerCall(call)
+	if err != nil {
 		resp.Error = err.Error()
 		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
-	resp.Payload = call.Payload.RawMessage
+
+	payloadClean, err := json.Marshal(cpl)
+	if err != nil {
+		resp.Error = err.Error()
+		c.JSON(http.StatusBadRequest, resp)
+		return
+	}
+
+	resp.Payload = payloadClean
+	if stripped {
+		resp.Message = "WARN: payload got stripped of non-allowed content"
+	}
+
 	c.JSON(200, resp)
 }
 
-func registerCall(c Call) error {
-	if !json.Valid(c.Payload.RawMessage) {
-		return fmt.Errorf("%s is invalid JSON", c.Payload.RawMessage)
+func registerCall(c Call) (CallPayload, bool, error) {
+	var pl CallPayload
+	var stripped bool
+
+	// still put valid value in jsonb col if body empoty
+	if reflect.DeepEqual(c.Payload.RawMessage, json.RawMessage{}) {
+		c.Payload.RawMessage = []byte(`{}`)
 	}
 
+	// check for validity
+	// this err might also be raised by unmarshalling
+	// to be checked
+	if !json.Valid(c.Payload.RawMessage) {
+		return pl, stripped, fmt.Errorf("'%s' is invalid JSON", c.Payload.RawMessage)
+	}
+
+	// make sure that no nested objects are passed
+	err := json.Unmarshal(c.Payload.RawMessage, &pl)
+	if err != nil {
+		return pl, stripped, err
+	}
+
+	// strip out unwanted stuff
+	pl, stripped = payloadStripper(pl)
 	c.Timestamp = time.Now()
 
 	result := db.Create(&c)
-	return result.Error
+	return pl, stripped, result.Error
 }
 
 func githubRepoExistsMW(c *gin.Context) {

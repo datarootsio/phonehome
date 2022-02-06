@@ -81,7 +81,7 @@ var doc = `{
                 }
             },
             "post": {
-                "description": "Register new call.\n\nRequires a JSON body in the shape of ` + "`" + `{\"foo\": \"bar\", \"coffee\": \"beans\"}` + "`" + `.",
+                "description": "Register new call.\n\nRequires a JSON body in the shape of ` + "`" + `{\"foo\": \"bar\", \"coffee\": 432}` + "`" + `.\nExpects either an empty object ` + "`" + `{}` + "`" + ` or an object that only contains keys and **unnested** values.\nNested objects will be stripped from the payload and a warning message will be returned.",
                 "consumes": [
                     "application/json"
                 ],
@@ -341,6 +341,15 @@ var doc = `{
             "properties": {
                 "error": {
                     "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "object"
+                },
+                "query": {
+                    "$ref": "#/definitions/main.FilterQuery"
                 }
             }
         }

@@ -49,6 +49,12 @@ definitions:
     properties:
       error:
         type: string
+      message:
+        type: string
+      payload:
+        type: object
+      query:
+        $ref: '#/definitions/main.FilterQuery'
     type: object
 host: api.phonehome.dev
 info:
@@ -102,7 +108,9 @@ paths:
       description: |-
         Register new call.
 
-        Requires a JSON body in the shape of `{"foo": "bar", "coffee": "beans"}`.
+        Requires a JSON body in the shape of `{"foo": "bar", "coffee": 432}`.
+        Expects either an empty object `{}` or an object that only contains keys and **unnested** values.
+        Nested objects will be stripped from the payload and a warning message will be returned.
       parameters:
       - description: github organisation
         in: path

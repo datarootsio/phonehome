@@ -203,7 +203,9 @@ func getCallsHandler(c *gin.Context) {
 // @Summary      Register new telemetry call.
 // @Description  Register new call.
 // @Description
-// @Description  Requires a JSON body in the shape of `{"foo": "bar", "coffee": "beans"}`.
+// @Description  Requires a JSON body in the shape of `{"foo": "bar", "coffee": 432}`.
+// @Description  Expects either an empty object `{}` or an object that only contains keys and **unnested** values.
+// @Description  Nested objects will be stripped from the payload and a warning message will be returned.
 // @Accept json
 // @Param        organisation  path   string  true   "github organisation"
 // @Param        repository    path   string  true   "repository name"

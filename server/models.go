@@ -49,7 +49,7 @@ type DailyCountResp struct {
 
 type RegisterResp struct {
 	DefaultResp
-	Payload json.RawMessage `json:"payload"`
+	Payload json.RawMessage `json:"payload" swaggertype:"object"`
 	Error   string          `json:"error,omitempty"`
 	Message string          `json:"message,omitempty"`
 }

@@ -219,6 +219,7 @@ func TestGetOrgRepoHTTP(t *testing.T) {
 	assert.True(t, len(dcr.Data) > 0)
 	assert.Equal(t, 1, len(dcr.Data))
 	assert.EqualValues(t, 2, dcr.Data[0].Count)
+	assert.NotContains(t, "T", dcr.Data[0].Date) // should not be a timestamp but a date
 
 	// finally lets get a total count for our badge
 	req, _ = http.NewRequest("GET", fmt.Sprintf("/%s/%s/count/badge", testOrg, testRepo), nil)

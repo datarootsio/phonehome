@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -41,6 +42,11 @@ func getCountCallsByDate(fq FilterQuery) (DayCounts, error) {
 		Find(&dc)
 	if res.Error != nil {
 		return dc, res.Error
+	}
+
+	// perhaps unmarshal to actual time.Time first before moving to string?
+	for i, v := range dc {
+		dc[i].Date = strings.Split(v.Date, "T")[0]
 	}
 
 	return dc, nil

@@ -28,7 +28,6 @@ func buildServer() *gin.Engine {
 	r.GET("/:organisation/:repository", getCallsHandler)
 
 	r.POST("/:organisation/:repository", githubRepoExistsMW, registerCallHander)
-	r.POST("/:organisation/:repository/", githubRepoExistsMW, registerCallHander)
 
 	r.StaticFile("/docs/swagger.json", "./docs/swagger.json")
 

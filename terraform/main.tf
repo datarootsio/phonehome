@@ -249,6 +249,10 @@ resource "google_storage_bucket" "website" {
   provider = google
   name     = "phonehome-website"
   location = "EU"
+
+  website {
+    main_page_suffix = "index.html"
+  }
 }
 
 # bucket

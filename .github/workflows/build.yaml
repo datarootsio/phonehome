@@ -127,7 +127,7 @@ jobs:
 
   terraform:
     name: 'Terraform Apply'
-    needs: deploy-docker
+    needs: [deploy-docker, build-static-site]
     runs-on: ubuntu-latest
     defaults:
       run:

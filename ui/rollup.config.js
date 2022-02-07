@@ -12,7 +12,7 @@ const production = !process.env.ROLLUP_WATCH;
 const serverURL = process.env.SERVER_URL ? process.env.SERVER_URL
 	: "http://localhost:8888"
 
-const readmeMarkdown = fs.readFileSync('../README.md', 'utf8')
+console.log(`using backend server url: ${serverURL}`)
 
 function serve() {
 	let server;

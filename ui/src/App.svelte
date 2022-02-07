@@ -1,11 +1,17 @@
+<svelte:head>
+
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Fira+Sans:wght@100;400;600;900&family=Inconsolata&display=swap");
+  </style>
+
+  <link rel="icon" type="image/svg" href="call.svg" />
+</svelte:head>
+
 <script>
   import Chart from "svelte-frappe-charts";
-  import SvelteMarkdown from 'svelte-markdown'
-
 
   let statsHidden = true;
   let chartData = {};
-  // let readmeMarkdown = "";
 
   let orgRepo = "datarootsio/cheek";
   let serverURL = process.env.SERVER_URL;
@@ -35,12 +41,6 @@
       orgRepo
     )}%2Fcount%2Fbadge`;
 </script>
-
-<svelte:head>
-  <style>
-    @import url("https://fonts.googleapis.com/css2?family=Fira+Sans:wght@100;400;600;900&family=Inconsolata&display=swap");
-  </style>
-</svelte:head>
 
 <main class="bg-dark-primary min-h-screen">
   <div class="text-white flex items-center justify-end p-2">

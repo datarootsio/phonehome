@@ -3,7 +3,6 @@ module github.com/datarootsio/phonehome
 go 1.17
 
 require (
-	github.com/davecgh/go-spew v1.1.1
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.7.7
 	github.com/rs/zerolog v1.26.1
@@ -11,7 +10,7 @@ require (
 	github.com/spf13/viper v1.10.1
 	github.com/swaggo/files v0.0.0-20210815190702-a29dd2bc99b2
 	github.com/swaggo/gin-swagger v1.4.0
-	github.com/swaggo/swag v1.7.8
+	github.com/swaggo/swag v1.7.9
 	gorm.io/driver/postgres v1.2.3
 	gorm.io/gorm v1.22.5
 )
@@ -20,6 +19,7 @@ require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.6 // indirect
 	github.com/go-openapi/spec v0.20.4 // indirect

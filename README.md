@@ -1,5 +1,5 @@
 [![swagger](https://img.shields.io/badge/openapi-available-blue?logo=swagger)](https://api.phonehome.dev/swagger/index.html)
-[![swagger](https://img.shields.io/badge/coverage-report-blueviolet?logo=go)](https://phonehome.dev/coverage.html)
+[![coverage](https://img.shields.io/badge/coverage-report-blueviolet?logo=go)](https://phonehome.dev/coverage.html)
 
 # phonehome: KISS telemetry for FOSS packages
 

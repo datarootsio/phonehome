@@ -1,36 +1,26 @@
 <script>
   import Chart from "svelte-frappe-charts";
+  import SvelteMarkdown from 'svelte-markdown'
+
 
   let statsHidden = true;
-  let cdata = {
-    labels: ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"],
-    datasets: [
-      {
-        values: [10, 12, 3, 9, 8, 15, 9],
-      },
-    ],
-  };
+  let chartData = {};
+  // let readmeMarkdown = "";
 
   let orgRepo = "datarootsio/cheek";
-  let serverURL = (process).env.serverURL;
+  let serverURL = process.env.SERVER_URL;
 
   const goButton = () => {
     let [org, repo] = orgRepo.split("/");
 
-    fetch(`${serverURL}/${org}/${repo}/count`)
-      .then((response) => response.json())
-      .then((data) => console.log(data));
-
     fetch(`${serverURL}/${org}/${repo}/count/daily`)
       .then((response) => response.json())
       .then((data) => {
-        console.log(22, data);
-
         let dates = data.data.map((x) => x.date);
         let counts = data.data.map((x) => x.count);
 
-        cdata.labels = dates;
-        cdata.datasets = [
+        chartData.labels = dates;
+        chartData.datasets = [
           {
             values: counts,
           },
@@ -40,8 +30,10 @@
       });
   };
 
-  let usageBadgeSrc = (count) =>
-    `https://img.shields.io/badge/dynamic/json?color=green&label=usage&query=data&url=https%3A%2F%2Fapi.dataroots.io%2Fv1%2Fcheek%2Ftriggered`;
+  let usageBadgeSrc = () =>
+    `https://img.shields.io/endpoint?url=https%3A%2F%2Fapi.phonehome.dev%2F${encodeURIComponent(
+      orgRepo
+    )}%2Fcount%2Fbadge`;
 </script>
 
 <svelte:head>
@@ -50,8 +42,8 @@
   </style>
 </svelte:head>
 
-<main class="bg-dark-primary w-full min-h-screen">
-  <div class="text-white flex items-center justify-end w-full p-2">
+<main class="bg-dark-primary min-h-screen">
+  <div class="text-white flex items-center justify-end p-2">
     <div class="right-0">
       <span class="pr-1 text-xs">by</span>
       <a href="https://dataroots.io"
@@ -63,16 +55,24 @@
       >
     </div>
   </div>
-  <div class="container mx-auto">
+  <div class="w-10/12 mx-auto">
     <h1
-      class="auto-mx font-mono text-6xl font-bold text-green-basic pt-12 text-center"
+      class="font-mono text-6xl font-bold text-green-basic pt-12 text-center"
     >
       phonehome.dev
     </h1>
-    <p class="pt-6 text-center text-purple-basic">
+    <p class="text-center pt-6 text-purple-basic">
       KISS telemetry for FOSS packages.
     </p>
-    <div class="mb-6 pt-12">
+
+    <div class="mx-auto flex flex-wrap justify-center gap-4 max-w-fit pt-8">
+      <a href="https://api.phonehome.dev/swagger/index.html"><img src="https://img.shields.io/badge/openapi-available-blue?logo=swagger" alt="swagger"></a>
+      <a class="inline" href="https://phonehome.dev/coverage.html"><img src="https://img.shields.io/badge/coverage-report-blueviolet?logo=go" alt="coverage"></a>
+      <a class="inline" href="https://github.com/datarootsio/phonehome"><img src="https://img.shields.io/badge/docs-README-green?logo=github" alt="readme"></a>
+
+    </div>
+    
+    <div class="mb-6 pt-24">
       <div class="mb-4 inline">
         <label class="block text-white text-sm mb-2" for="username">
           organisation/repository
@@ -91,13 +91,19 @@
           >
             Go
           </button>
+          {#if statsHidden}
+            <span class="pl-2 text-purple-basic"> 👈 Try me </span>
+          {/if}
         </div>
       </div>
 
-      <div class={`pt-12 ${statsHidden ? "hidden" : "visible"}`}>
-        <img alt="total-count" src={usageBadgeSrc()} />
-        <Chart data={cdata} type="line" />
-      </div>
+      {#if !statsHidden}
+        <div class="pt-12">
+          <img alt="total-count" src={usageBadgeSrc()} />
+          <Chart data={chartData} type="line" />
+        </div>
+      {/if}
+    
     </div>
   </div>
 </main>

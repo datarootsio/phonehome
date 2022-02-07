@@ -5,10 +5,14 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
 import replace from '@rollup/plugin-replace';
+const fs = require('fs')
+
 
 const production = !process.env.ROLLUP_WATCH;
 const serverURL = process.env.SERVER_URL ? process.env.SERVER_URL
 	: "http://localhost:8888"
+
+const readmeMarkdown = fs.readFileSync('../README.md', 'utf8')
 
 function serve() {
 	let server;
@@ -42,12 +46,8 @@ export default {
 	plugins: [
 		replace({
 			preventAssignment: true,
-			process: JSON.stringify({
-				test: 3,
-				env: {
-					serverURL: serverURL
-				}
-			})
+			'process.env.SERVER_URL': JSON.stringify(serverURL),
+			'readmeMarkdown': JSON.stringify(readmeMarkdown)
 		}),
 		svelte({
 			compilerOptions: {

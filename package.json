@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "svelte-markdown": "^0.2.2"
+  }
+}

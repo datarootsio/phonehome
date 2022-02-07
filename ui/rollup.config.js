@@ -47,7 +47,6 @@ export default {
 		replace({
 			preventAssignment: true,
 			'process.env.SERVER_URL': JSON.stringify(serverURL),
-			'readmeMarkdown': JSON.stringify(readmeMarkdown)
 		}),
 		svelte({
 			compilerOptions: {

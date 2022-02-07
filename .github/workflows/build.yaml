@@ -78,6 +78,8 @@ jobs:
         working-directory: ./ui
       - run: npm run build
         working-directory: ./ui
+        env:
+          SERVER_URL: https://api.phonehome.dev
       - uses: 'google-github-actions/auth@v0'
         with:
           credentials_json: '${{ secrets.GCP_TF_SA_CREDENTIALS }}'

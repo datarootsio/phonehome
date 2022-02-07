@@ -60,6 +60,7 @@ type Call struct {
 	Payload      pgd.Jsonb `gorm:"type:jsonb" json:"payload" swaggertype:"object"`
 	Organisation string    `gorm:"not null" json:"organisation"`
 	Repository   string    `gorm:"not null" json:"repository"`
+	Origin       string    `json:"origin"`
 }
 
 type CallPayload map[string]interface{}

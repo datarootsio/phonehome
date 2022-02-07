@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 )
 
@@ -237,6 +240,8 @@ func registerCallHander(c *gin.Context) {
 
 	call.Organisation = or.Organisation
 	call.Repository = or.Repository
+	originSha := sha256.Sum256([]byte(c.ClientIP()))
+	call.Origin = hex.EncodeToString(originSha[:])
 
 	cpl, stripped, err := registerCall(call)
 	if err != nil {
@@ -256,6 +261,7 @@ func registerCallHander(c *gin.Context) {
 	if stripped {
 		resp.Message = "WARN: payload got stripped of non-allowed content"
 	}
+	spew.Dump(call)
 
 	c.JSON(200, resp)
 }

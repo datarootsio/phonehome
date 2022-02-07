@@ -12,10 +12,10 @@ import (
 const YYYYMMDDLayout = "2006-01-02"
 
 type BadgeInfo struct {
-	SchemaVersion int64
-	Label         string
-	Message       string
-	Color         string
+	SchemaVersion int64  `json:"schemaVersion"`
+	Label         string `json:"label"`
+	Message       string `json:"message"`
+	Color         string `json:"color"`
 }
 
 func (bi BadgeInfo) Create(count int64) BadgeInfo {

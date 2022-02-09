@@ -42,6 +42,7 @@ func getCountCallsByDate(fq FilterQuery) (DayCounts, error) {
 	res := gq.Model(&Call{}).
 		Group("timestamp::date").
 		Select("timestamp::date as date, count(*) as count").
+		Order("timestamp::date asc").
 		Find(&dc)
 	if res.Error != nil {
 		return dc, res.Error

@@ -87,7 +87,7 @@ jobs:
       - run: gsutil -m copy -r ./public/* gs://phonehome-website
         working-directory: ./ui
       # cov report
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         with:
           name: coverage-report
       - run: gsutil copy coverage.html gs://phonehome-website

@@ -13,7 +13,7 @@ require (
 	github.com/swaggo/gin-swagger v1.4.0
 	github.com/swaggo/swag v1.7.8
 	gorm.io/driver/postgres v1.2.3
-	gorm.io/gorm v1.22.5
+	gorm.io/gorm v1.24.6
 )
 
 require (
@@ -34,7 +34,7 @@ require (
 	github.com/jackc/pgtype v1.9.0 // indirect
 	github.com/jackc/pgx/v4 v4.14.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
-	github.com/jinzhu/now v1.1.4 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/lib/pq v1.10.2 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
